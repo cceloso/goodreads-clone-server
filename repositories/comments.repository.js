@@ -1,6 +1,4 @@
-const commonRepo = require('./common.repository');
 const knex = require('./knex');
-const { nanoid } = require('nanoid');
 
 const usersRepo = {
     getAllComments: (reviewId) => {

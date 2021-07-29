@@ -1,11 +1,4 @@
-const commonRepo = require('./common.repository');
-const genresRepo = require('./genres.repository');
-const responsesController = require('../controllers/responses.controller');
 const knex = require('./knex');
-const { nanoid } = require('nanoid');
-
-let books = [];
-let bookIdCtr = 1;
 
 const booksRepo = {
     getAllBooks: () => {
@@ -41,22 +34,6 @@ const booksRepo = {
     getBookGenreIds: (id) => {
         return knex.raw("CALL getBookGenreIds(?)", [id])
         .finally(() => knex.destroy);
-    },
-
-    searchBookIndex: (id) => {
-        return commonRepo.searchIndex(id, books);
-    },
-    
-    bookAlreadyExists: (newBook) => {
-        const filteredBooks = books.filter(book => book.title == newBook.title);
-        
-        for(let i = 0; i < filteredBooks.length; i++) {
-            if(filteredBooks[i]['title'] === newBook['title'] && filteredBooks[i]['author'] === newBook['author']) {
-                return true;
-            } else {
-                return false;
-            }
-        }
     },
 
     addBook: (bookId, authorId, newBook) => {

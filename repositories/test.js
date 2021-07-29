@@ -1,4 +1,4 @@
-const knex = require('./knex');
+const knex = require('../controllers/knex');
 const { nanoid } = require('nanoid');
 
 let bookId = "VKHMmhWu7g11J0VkhGVZi";

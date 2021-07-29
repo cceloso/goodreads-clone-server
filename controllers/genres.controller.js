@@ -5,7 +5,6 @@ const { nanoid } = require('nanoid');
 const controller = {
     getGenre: (req, res) => {
         new Promise((resolve, reject) => {
-            // View all genres
             if(!req.params.genreId) {
                 genresRepo.getAllGenres()
                     .then((val) => {
@@ -18,7 +17,6 @@ const controller = {
                     })
             }
 
-            // View specific genre if there's genreId
             else {
                 genresRepo.getGenre(req.params.genreId)
                     .then((val) => {
@@ -49,13 +47,11 @@ const controller = {
 
     postGenre: (req, res) => {
         new Promise((resolve, reject) => {
-            // Reject if genre id parameter is set (/genres/<genreId> instead of /genres)
             if(req.params.genreId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Genre id parameter is set. If you intend to edit the genre with this id, please send a PUT request; else, please remove id parameter.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if body is empty
             else if(!req.body.data) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
@@ -106,19 +102,16 @@ const controller = {
 
     putGenre: (req, res) => {
         new Promise((resolve, reject) => {
-            // Reject if body id parameter is empty (/genres instead of /genres/<genreId>)
             if(!req.params.genreId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Genre id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if body is empty
             else if(!req.body.data) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if genre doesn't exist; else, edit genre info
             else {
                 if(Object.keys(req.body.data).length < 1) {
                     errorCode = 400;
@@ -169,7 +162,6 @@ const controller = {
 
     deleteGenre: (req, res) => {
         new Promise((resolve, reject) => {
-            // Reject if genre id parameter is empty (/genres instead of /genres/<genreId>)
             if(!req.params.genreId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Genre id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));

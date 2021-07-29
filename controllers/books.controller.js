@@ -8,7 +8,6 @@ let bookIndex = 1;
 const controller = {
     getBook: (req, res) => {
         new Promise((resolve, reject) => {
-            // View all books or view books by genre if there's no bookId
             if(!req.params.bookId) {
                 const splittedUrl = req.url.split('?');
 
@@ -61,7 +60,6 @@ const controller = {
                 }
             }
 
-            // View specific book if there's bookId
             else {
                 booksRepo.getBook(req.params.bookId)
                 .then((val) => {
@@ -98,13 +96,11 @@ const controller = {
             // let genreId = nanoid();
             const expectedAttributes = 8;
 
-            // Reject if book id parameter is set (/books/<bookId> instead of /books)
             if(req.params.bookId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Book id parameter is set. If you intend to edit the book with this id, please send a PUT request; else, please remove id parameter.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if body is empty
             else if(!req.body.data) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
@@ -121,7 +117,6 @@ const controller = {
                     errorCode = 400;
                     reject(responsesController.createErrorMessage(400, "Genres attribute is empty.", "INVALID_ARGUMENT"));
                 } else {
-                    // Add book
                     const authorId = nanoid();
                     booksRepo.addBook(bookId, authorId, req.body.data)
                     .then(() => {
@@ -196,19 +191,16 @@ const controller = {
             let genresToDelete = [];
             const expectedAttributes = 8;
 
-            // Reject if body id parameter is empty (/books instead of /books/<bookId>)
             if(!req.params.bookId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Book id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if body is empty
             else if(!req.body.data) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if book doesn't exist; else, edit book info
             else {
                 newGenres = req.body.data.genres;
 
@@ -351,7 +343,6 @@ const controller = {
 
     deleteBook: (req, res) => {
         new Promise((resolve, reject) => {
-            // Reject if book id parameter is empty (/books instead of /books/<bookId>)
             if(!req.params.bookId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Book id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
@@ -390,7 +381,6 @@ const controller = {
                 reject(responsesController.createErrorMessage(404, "Book id parameter is empty.", "INVALID_ARGUMENT"));
             }
 
-            // View book's genres
             else {
                 booksRepo.getBookGenre(req.params.bookId)
                 .then((val) => {

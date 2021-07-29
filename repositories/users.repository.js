@@ -1,6 +1,4 @@
-const commonRepo = require('./common.repository');
 const knex = require('./knex');
-const { nanoid } = require('nanoid');
 
 const usersRepo = {
     getAllUsers: () => {
@@ -8,43 +6,14 @@ const usersRepo = {
         .finally(() => knex.destroy);
     },
 
-    // getUser: (userId) => {
-    //     console.log(`userId: ${userId}`);
-    //     return knex.raw("CALL getUser(?)", [userId])
-    //     .finally(() => knex.destroy);
-    // },
-
     getUser: (user) => {
-        // console.log(`userId: ${userId}`);
         return knex.raw("CALL getUser(?, ?)", [user.username, user.password])
         .finally(() => knex.destroy);
     },
 
     loginUser: (user) => {
-        // console.log(`userId: ${userId}`);
         return knex.raw("CALL loginUser(?, ?)", [user.usernameOrEmail, user.password])
         .finally(() => knex.destroy);
-    },
-
-    zeroFill: (i) => {
-        return (i < 10 ? '0' : '') + i;
-    },
-
-    searchUserIndex: (id) => {
-        return commonRepo.searchIndex(id, users);
-    },
-
-    userAlreadyExists: (newUser) => {
-        const filteredUsername = users.filter(user => user.username == newUser.username);
-        const filteredEmail = users.filter(user => user.email == newUser.email);
-        
-        if(filteredUsername.length != 0) {
-            return 1;
-        } else if(filteredEmail != 0) {
-            return 2;
-        } else {
-            return 0;
-        }
     },
 
     addUser: (userId, newUser) => {

@@ -1,5 +1,4 @@
 const knex = require('./knex');
-const { nanoid } = require('nanoid');
 
 const genresRepo = {
     getAllGenres: () => {

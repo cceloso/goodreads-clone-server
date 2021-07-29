@@ -5,10 +5,8 @@ let reviewIndex = 1;
 const controller = {
     getReview: (req, res) => {
         new Promise((resolve, reject) => {
-            // View all reviews if there's no reviewId
             if(!req.params.reviewId) {
                 console.log("from getAllReviews: ");
-                // resolve();
                 reviewsRepo.getAllReviews(req.params.bookId)
                 .then((val) => {
                     let reviews = val[0][0];
@@ -20,7 +18,6 @@ const controller = {
                 })
             }
 
-            // View specific review if there's reviewId
             else {
                 console.log("from getReview: ");
                 reviewsRepo.getReview(req.params.reviewId)
@@ -51,7 +48,6 @@ const controller = {
         new Promise((resolve, reject) => {
             const expectedAttributes = 2;
 
-            // Reject if user id parameter is set (/users/<userId> instead of /users)
             if(!req.body.data) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
@@ -118,19 +114,16 @@ const controller = {
         new Promise((resolve, reject) => {
             const expectedAttributes = 2;
 
-            // Reject if review id parameter is empty (/reviews instead of /reviews/<reviewId>)
             if(!req.params.reviewId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Review id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if body is empty
             else if(!req.body.data) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if review doesn't exist; else, edit review info
             else {
                 if(Object.keys(req.body.data).length < expectedAttributes) {
                     errorCode = 400;
@@ -167,7 +160,6 @@ const controller = {
 
     deleteReview: (req, res) => {
         new Promise((resolve, reject) => {
-            // Reject if review id parameter is empty (/reviews instead of /reviews/<reviewId>)
             if(!req.params.reviewId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Review id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
@@ -176,7 +168,6 @@ const controller = {
             else {
                 reviewsRepo.deleteReview(req.params.reviewId, req.params.bookId)
                 .then((val) => {
-                    // console.log(val[0][1].affectedRows);
                     if(val[0][1].affectedRows == 0) {
                         errorCode = 404;
                         reject(responsesController.createErrorMessage(404, "Review not found. Please pass a valid review id.", "NOT_FOUND"));

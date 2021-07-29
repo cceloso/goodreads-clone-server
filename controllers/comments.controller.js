@@ -5,10 +5,8 @@ let commentIndex = 1;
 const controller = {
     getComment: (req, res) => {
         new Promise((resolve, reject) => {
-            // View all comments if there's no commentId
             if(!req.params.commentId) {
                 console.log("from getAllComments: ");
-                // resolve();
                 commentsRepo.getAllComments(req.params.reviewId)
                 .then((val) => {
                     let comments = val[0][0];
@@ -20,7 +18,6 @@ const controller = {
                 })
             }
 
-            // View specific comment if there's commentId
             else {
                 console.log("from getComment: ");
                 commentsRepo.getComment(req.params.commentId)
@@ -41,9 +38,6 @@ const controller = {
         })
         .then((commentsToDisplay) => {
             res.status(200).json(commentsToDisplay);
-            // res.status(200).json({
-            //     data: usersToDisplay
-            // });
         })
         .catch((errorMessage) => {
             res.status(errorCode).json(errorMessage);
@@ -115,19 +109,16 @@ const controller = {
         new Promise((resolve, reject) => {
             const expectedAttributes = 1;
 
-            // Reject if comment id parameter is empty (/comments instead of /comments/<commentId>)
             if(!req.params.commentId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Comment id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if body is empty
             else if(!req.body.data) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
             }
 
-            // Reject if comment doesn't exist; else, edit comment info
             else {
                 if(Object.keys(req.body.data).length < expectedAttributes) {
                     errorCode = 400;
@@ -175,7 +166,6 @@ const controller = {
 
     deleteComment: (req, res) => {
         new Promise((resolve, reject) => {
-            // Reject if comment id parameter is empty (/comments instead of /comments/<commentId>)
             if(!req.params.commentId) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Comment id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
