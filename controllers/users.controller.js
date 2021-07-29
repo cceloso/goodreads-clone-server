@@ -24,26 +24,23 @@ const controller = {
             else {
                 console.log("from getUsers: ");
                 usersRepo.getUser(req.params.userId)
-                    .then((val) => {
-                        let user = val[0][0];
-                        if(user.length == 0) {
-                            errorCode = 404;
-                            reject(responsesController.createErrorMessage(404, "User not found. Please provide a valid user id.", "NOT_FOUND"));
-                        } else {
-                            resolve(user);
-                        }
-                    })
-                    .catch((err) => {
-                        errorCode = 500;
-                        reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                    })
+                .then((val) => {
+                    let user = val[0][0];
+                    if(user.length == 0) {
+                        errorCode = 404;
+                        reject(responsesController.createErrorMessage(404, "User not found. Please provide a valid user id.", "NOT_FOUND"));
+                    } else {
+                        resolve(user);
+                    }
+                })
+                .catch((err) => {
+                    errorCode = 500;
+                    reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+                })
             }
         })
         .then((usersToDisplay) => {
             res.status(200).json(usersToDisplay);
-            // res.status(200).json({
-            //     data: usersToDisplay
-            // });
         })
         .catch((errorMessage) => {
             res.status(errorCode).json(errorMessage);
@@ -67,18 +64,39 @@ const controller = {
             }
 
             else {
-                if(Object.keys(req.body.data).length < expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-                } else if(Object.keys(req.body.data).length > expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
-                } else {
+                // if(Object.keys(req.body.data).length < expectedAttributes) {
+                //     errorCode = 400;
+                //     reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
+                // } else if(Object.keys(req.body.data).length > expectedAttributes) {
+                //     errorCode = 400;
+                //     reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
+                // } 
+                if(Object.keys(req.body.data).length == 2) {
+                    usersRepo.loginUser(req.body.data)
+                    .then((val) => {
+                        const loginResult = val[0][0][0]['v_loginResult'];
+
+                        if(loginResult === "SUCCESS") {
+                            resolve("Login successful.");
+                        } else if(loginResult === "INVALID_PASSWORD") {
+                            errorCode = 403;
+                            reject(responsesController.createErrorMessage(403, "Invalid password.", "PERMISSION_DENIED"));
+                        } else if(loginResult === "INVALID_USER") {
+                            errorCode = 403;
+                            reject(responsesController.createErrorMessage(403, "Invalid username or email address.", "PERMISSION_DENIED"));
+                        }
+                    })
+                    .catch((err) => {
+                        errorCode = 500;
+                        reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+                    })
+                }
+                else {
                     let userId = userIndex;
                     usersRepo.addUser(userId, req.body.data)
                         .then(() => {
                             userIndex++;
-                            resolve();
+                            resolve("Signup successful.");
                         })
                         .catch((err) => {
                             if(err.code == 'ER_DUP_ENTRY') {
@@ -103,9 +121,10 @@ const controller = {
                 }
             }
         })
-        .then(() => {
+        .then((successMessage) => {
             res.status(201).json({
-                message: "Successfully added a user."
+                // message: "Successfully added a user."
+                message: successMessage
             });
         })
         .catch((errorMessage) => {

@@ -24,27 +24,40 @@ const controller = {
                     })
                 } else {
                     const splittedParams = splittedUrl[1].split('=');
-                    const genreId = splittedParams[1];
+                    const genreName = splittedParams[1];
 
-                    console.log("genreId");
-                    console.log(genreId);
-                    booksRepo.getBooksByGenre(genreId)
-                    .then((val) => {
-                        let books = val[0][0];
-                        if(books.length != 0) {
-                            // console.log(books);
-                            resolve(books);
-                        } else {
-                            // console.log("No books with that genre");
-                            errorCode = 404;
-                            reject(responsesController.createErrorMessage(404, "Genre not found or no books associated with that genre.", "NOT_FOUND"));
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        errorCode = 500;
-                        reject(responsesController.createErrorMessage(500, "Server-side error.", "UNKNOWN"));
-                    })
+                    console.log("genreName");
+                    console.log(genreName);
+
+                    if(genreName == "all") {
+                        genresRepo.getAllGenres()
+                        .then((val) => {
+                            let genres = val[0][0];
+                            resolve(genres);
+                        })
+                        .catch((err) => {
+                            errorCode = 500;
+                            reject(responsesController.createErrorMessage(500, "Server-side error.", "ERROR"));
+                        })
+                    } else {
+                        booksRepo.getBooksByGenre(genreName)
+                        .then((val) => {
+                            let books = val[0][0];
+                            if(books.length != 0) {
+                                // console.log(books);
+                                resolve(books);
+                            } else {
+                                // console.log("No books with that genre");
+                                errorCode = 404;
+                                reject(responsesController.createErrorMessage(404, "Genre not found or no books associated with that genre.", "NOT_FOUND"));
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            errorCode = 500;
+                            reject(responsesController.createErrorMessage(500, "Server-side error.", "UNKNOWN"));
+                        })
+                    }
                 }
             }
 

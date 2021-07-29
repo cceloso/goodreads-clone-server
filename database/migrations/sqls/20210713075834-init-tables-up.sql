@@ -32,12 +32,49 @@ BEGIN
 	SELECT *  FROM `users`;
 END;
 
+-- CREATE PROCEDURE `getUser`(
+-- 	IN `p_id` VARCHAR(48)
+-- )
+-- BEGIN
+-- 	SELECT *  FROM `users`
+--     WHERE `id` = `p_id`;
+-- END;
+
 CREATE PROCEDURE `getUser`(
-	IN `p_id` VARCHAR(48)
+	IN `p_username` VARCHAR(48),
+    IN `p_password` VARCHAR(48)
 )
 BEGIN
 	SELECT *  FROM `users`
-    WHERE `id` = `p_id`;
+    WHERE `username` = `p_username` AND `password` = `p_password`;
+END;
+
+CREATE PROCEDURE `loginUser`(
+	IN `p_usernameOrEmail` VARCHAR(255),
+    IN `p_password` VARCHAR(255)
+)
+BEGIN
+	DECLARE `v_selectedUser` INT;
+    -- DECLARE `v_loginResult` VARCHAR(255);
+    DECLARE v_loginResult VARCHAR(255);
+    
+	SELECT COUNT(*) INTO `v_selectedUser`  FROM `users`
+    WHERE (`username` = `p_usernameOrEmail` OR `email` = `p_usernameOrEmail`) AND `password` = `p_password`;
+    
+    IF `v_selectedUser` = 1 THEN
+		SET v_loginResult = "SUCCESS";
+	ELSE
+		SELECT COUNT(*) INTO `v_selectedUser` FROM `users`
+        WHERE `username` = `p_usernameOrEmail` OR `email` = `p_usernameOrEmail`;
+        
+        IF `v_selectedUser` = 1 THEN
+			SET v_loginResult = "INVALID_PASSWORD";
+		ELSE
+			SET v_loginResult = "INVALID_USER";
+		END IF;
+	END IF;
+    
+    SELECT v_loginResult;
 END;
 
 CREATE PROCEDURE `putUser`(

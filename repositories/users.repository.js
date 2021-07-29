@@ -8,9 +8,21 @@ const usersRepo = {
         .finally(() => knex.destroy);
     },
 
-    getUser: (userId) => {
-        console.log(`userId: ${userId}`);
-        return knex.raw("CALL getUser(?)", [userId])
+    // getUser: (userId) => {
+    //     console.log(`userId: ${userId}`);
+    //     return knex.raw("CALL getUser(?)", [userId])
+    //     .finally(() => knex.destroy);
+    // },
+
+    getUser: (user) => {
+        // console.log(`userId: ${userId}`);
+        return knex.raw("CALL getUser(?, ?)", [user.username, user.password])
+        .finally(() => knex.destroy);
+    },
+
+    loginUser: (user) => {
+        // console.log(`userId: ${userId}`);
+        return knex.raw("CALL loginUser(?, ?)", [user.usernameOrEmail, user.password])
         .finally(() => knex.destroy);
     },
 
