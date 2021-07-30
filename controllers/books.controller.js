@@ -101,30 +101,30 @@ const controller = {
                 reject(responsesController.createErrorMessage(400, "Book id parameter is set. If you intend to edit the book with this id, please send a PUT request; else, please remove id parameter.", "INVALID_ARGUMENT"));
             }
 
-            else if(!req.body.data) {
+            else if(!req.body) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
             }
 
             else {
-                if(Object.keys(req.body.data).length < expectedAttributes) {
+                if(Object.keys(req.body).length < expectedAttributes) {
                     errorCode = 400;
                     reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-                } else if(Object.keys(req.body.data).length > expectedAttributes) {
+                } else if(Object.keys(req.body).length > expectedAttributes) {
                     errorCode = 400;
                     reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
-                } else if(req.body.data.genres.length == 0) {
+                } else if(req.body.genres.length == 0) {
                     errorCode = 400;
                     reject(responsesController.createErrorMessage(400, "Genres attribute is empty.", "INVALID_ARGUMENT"));
                 } else {
                     const authorId = nanoid();
-                    booksRepo.addBook(bookId, authorId, req.body.data)
+                    booksRepo.addBook(bookId, authorId, req.body)
                     .then(() => {
                         bookIndex++;
                         resolve();
                     })
                     .then(() => {
-                        genres = req.body.data.genres;
+                        genres = req.body.genres;
 
                         // Check if each genre exists; if not, add it
                         for(let i = 0; i < genres.length; i++) {
