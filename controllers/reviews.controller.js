@@ -48,16 +48,16 @@ const controller = {
         new Promise((resolve, reject) => {
             const expectedAttributes = 2;
 
-            if(!req.body.data) {
+            if(!req.body) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
             }
 
             else {
-                if(Object.keys(req.body.data).length < expectedAttributes) {
+                if(Object.keys(req.body).length < expectedAttributes) {
                     errorCode = 400;
                     reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-                } else if(Object.keys(req.body.data).length > expectedAttributes) {
+                } else if(Object.keys(req.body).length > expectedAttributes) {
                     errorCode = 400;
                     reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
                 } else {
@@ -72,7 +72,7 @@ const controller = {
                     // resolve();
                     console.log(`reviewIndex: ${reviewIndex}`);
 
-                    reviewsRepo.addReview(reviewId, req.body.data, bookId, userId)
+                    reviewsRepo.addReview(reviewId, req.body, bookId, userId)
                     .then(() => {
                         reviewIndex++;
                         console.log(`nextReviewIndex: ${reviewIndex}`);

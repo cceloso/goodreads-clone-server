@@ -222,6 +222,26 @@ const controller = {
         .catch((errorMessage) => {
             res.status(errorCode).json(errorMessage);
         })
+    },
+
+    getReviewsByUser: (req, res) => {
+        new Promise((resolve, reject) => {
+            usersRepo.getReviewsByUser(req.params.userId)
+            .then((val) => {
+                let reviews = val[0][0];
+                resolve(reviews);
+            })
+            .catch((err) => {
+                errorCode = 500;
+                reject(responsesController.createErrorMessage(500, err, "ERROR"));
+            })
+        })
+        .then((usersToDisplay) => {
+            res.status(200).json(usersToDisplay);
+        })
+        .catch((errorMessage) => {
+            res.status(errorCode).json(errorMessage);
+        })
     }
 };
 

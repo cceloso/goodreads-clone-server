@@ -20,6 +20,9 @@ router.get('/', controller.getUser);
 /* View specific user */
 router.get('/:userId', controller.getUser);
 
+/* View user's reviews */
+router.get('/:userId/reviews', controller.getReviewsByUser);
+
 /* Delete specific user (w/o bookId, invalid) */
 router.delete('/', controller.deleteUser);
 

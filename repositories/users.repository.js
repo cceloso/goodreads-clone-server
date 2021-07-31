@@ -30,6 +30,11 @@ const usersRepo = {
         return knex.raw("CALL deleteUser(?)", [userId])
         .finally(() => knex.destroy);
     },
+
+    getReviewsByUser: (userId) => {
+        return knex.raw("CALL getReviewsByUser(?)", [userId])
+        .finally(() => knex.destroy);
+    }
 };
 
 module.exports = usersRepo;

@@ -531,6 +531,14 @@ BEGIN
     WHERE `bookId` = `p_bookId`;
 END;
 
+CREATE PROCEDURE `getReviewsByUser`(
+    IN `p_userId` VARCHAR(48)
+)
+BEGIN
+	SELECT *  FROM `reviews`
+    WHERE `userId` = `p_userId`;
+END;
+
 CREATE PROCEDURE `getReview`(
 	IN `p_id` VARCHAR(48)
 )

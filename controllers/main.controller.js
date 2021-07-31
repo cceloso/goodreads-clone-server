@@ -10,6 +10,7 @@ const controller = {
     postUser: usersController.postUser,
     putUser: usersController.putUser,
     deleteUser: usersController.deleteUser,
+    getReviewsByUser: usersController.getReviewsByUser,
 
     /* BOOKS CONTROLLER */
     getBook: booksController.getBook,
