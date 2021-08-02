@@ -1,5 +1,5 @@
 # base image (all dockerfiles should have this)
-FROM node:12.2.0
+FROM node:12.14
  
 # set working directory
 WORKDIR /app
