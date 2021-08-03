@@ -1,44 +1,26 @@
-// const passport = require('passport');
-// const LocalStrategy = require('passport-local').Strategy;
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const fs = require('fs');
+const path = require('path');
 
-// const bcrypt = require('bcrypt');
-// const usersRepo = require('./repositories/users.repository');
-// const knex = require('./repositories/knex');
+const usersRepo = require('./repositories/users.repository');
 
-// passport.use(new LocalStrategy({
-//         usernameField: 'usernameOrEmail',
-//         passwordField: 'password'
-//     }, 
-//     function (usernameOrEmail, password, cb) {
-//         let user;
-//         let correctPassword = "";
+const options = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: "secret"
+};
 
-//         knex.raw("CALL getUserByUsernameOrEmail(?)", [usernameOrEmail])
-//         .then((val) => {
-//             // console.log("val:", val[0][0]);
-//             if(val[0][0].length != 0) {
-//                 user = val[0][0][0];
-//                 correctPassword = user['password'];
-//                 console.log(correctPassword);
-//             } else {
-//                 console.log("User does not exist.");
-//                 return cb(null, false, {message: "User does not exist."});
-//             }
-//         })
-//         .then(async () => {
-//             if (await bcrypt.compare(password, correctPassword)) {
-//                 console.log("Password is correct.");
-//                 return cb(null, user, {message: "Logged in successfully."});
-//             } else {
-//                 console.log("Password is incorrect.");
-//                 return cb(null, false, {message: "Password is incorrect."});
-//             }
-//         })
-//         .catch((err) => {
-//             console.log("inside catch in loginUser repo");
-//             console.log("err:", err);
-//             cb(err);
-//         })
-//         .finally(() => knex.destroy);
-//     }
-// ));
+module.exports = (passport) => {
+    passport.use(new JwtStrategy(options, function(jwt_payload, done) {
+        usersRepo.getUserById(jwt_payload.sub)
+        .then((val) => {
+            let user = val[0][0][0];
+            console.log("user authorized");
+            return done(null, user);
+        })
+        .catch((err) => {
+            console.log("user not authorized");
+            return done(err, false);
+        })
+    }));
+}

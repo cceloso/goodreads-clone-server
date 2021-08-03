@@ -7,7 +7,7 @@ var cors = require('cors');
 // require('./passport');
 require('dotenv').config();
 
-// var passport = require('passport');
+var passport = require('passport');
 // var initializePassport = require('./passport-config');
 // initializePassport(passport);
 
@@ -19,6 +19,8 @@ var genresRouter = require('./routes/genres');
 // const auth = require('./routes/auth');
 
 var app = express();
+
+require('./passport')(passport);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

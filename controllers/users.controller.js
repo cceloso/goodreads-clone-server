@@ -22,7 +22,7 @@ const controller = {
 
             else {
                 console.log("from getUsers: ");
-                usersRepo.getUser(req.params.userId)
+                usersRepo.getUserById(req.params.userId)
                 .then((val) => {
                     let user = val[0][0];
                     if(user.length == 0) {

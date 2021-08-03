@@ -12,6 +12,13 @@ const usersRepo = {
         .finally(() => knex.destroy);
     },
 
+    getUserById: (userId) => {
+        console.log("inside getUserById");
+        console.log("userId:", userId);
+        return knex.raw("CALL getUserById(?)", [userId])
+        .finally(() => knex.destroy);
+    },
+
     // loginUser: (user) => {
     //     return knex.raw("CALL loginUser(?, ?)", [user.usernameOrEmail, user.password])
     //     .finally(() => knex.destroy);

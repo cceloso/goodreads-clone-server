@@ -52,6 +52,14 @@ BEGIN
     WHERE `username` = `p_username` AND `password` = `p_password`;
 END;
 
+CREATE PROCEDURE `getUserById`(
+	IN `p_id` VARCHAR(48)
+)
+BEGIN
+	SELECT *  FROM `users`
+    WHERE `id` = `p_id`;
+END;
+
 CREATE PROCEDURE `getUserByUsernameOrEmail`(
 	IN `p_usernameOrEmail` VARCHAR(255)
 )

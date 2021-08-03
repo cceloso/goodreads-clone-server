@@ -1,15 +1,13 @@
 var express = require('express');
 var router = express.Router();
 const passport = require('passport');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const JwtStrategy = require('passport-jwt').Strategy
-const ExtractJwt = require('passport-jwt').ExtractJwt;
+// const jwt = require('jsonwebtoken');
+// const bcrypt = require('bcrypt');
+// const JwtStrategy = require('passport-jwt').Strategy
+// const ExtractJwt = require('passport-jwt').ExtractJwt;
 
 const issueJWT = require('../lib/utils');
-
 const usersRepo = require('../repositories/users.repository');
-// const knex = require('../repositories/knex');
 
 let userIndex = 1;
 
