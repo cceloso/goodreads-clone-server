@@ -25,6 +25,9 @@ CREATE PROCEDURE `postUser`(
 BEGIN
 	INSERT INTO `users` (`id`, `firstname`, `lastname`, `username`, `email`, `password`, `createdAt`, `imageUrl`, `role`)
     VALUES (`p_id`, `p_firstname`, `p_lastname`, `p_username`, `p_email`, `p_password`, NOW(), `p_imageUrl`, `p_role`);
+
+    SELECT * FROM `users`
+    WHERE `username` = `p_username`;
 END;
 
 CREATE PROCEDURE `getAllUsers`()

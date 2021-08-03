@@ -5,18 +5,18 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 // require('./passport');
-var bcrypt = require('bcrypt');
+require('dotenv').config();
 
-var passport = require('passport');
-var initializePassport = require('./passport-config');
-initializePassport(passport);
+// var passport = require('passport');
+// var initializePassport = require('./passport-config');
+// initializePassport(passport);
 
 var indexRouter = require('./routes/index');
+var loginRouter = require('./routes/login');
 var usersRouter = require('./routes/users');
 var booksRouter = require('./routes/books');
 var genresRouter = require('./routes/genres');
 // const auth = require('./routes/auth');
-// app.use('/auth', auth);
 
 var app = express();
 
@@ -39,7 +39,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// app.use('/auth', auth);
+
 app.use('/', indexRouter);
+app.use('/', loginRouter);
 app.use('/users', usersRouter);
 app.use('/books', booksRouter);
 app.use('/genres', genresRouter);

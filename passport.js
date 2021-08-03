@@ -1,40 +1,44 @@
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
+// const passport = require('passport');
+// const LocalStrategy = require('passport-local').Strategy;
 
-const passportJWT = require("passport-jwt");
-const JWTStrategy   = passportJWT.Strategy;
-const ExtractJWT = passportJWT.ExtractJwt;
+// const bcrypt = require('bcrypt');
+// const usersRepo = require('./repositories/users.repository');
+// const knex = require('./repositories/knex');
 
-passport.use(new LocalStrategy({
-        usernameField: 'email',
-        passwordField: 'password'
-    }, 
-    function (email, password, cb) {
-        //this one is typically a DB call. Assume that the returned user object is pre-formatted and ready for storing in JWT
-        return UserModel.findOne({email, password})
-           .then(user => {
-               if (!user) {
-                   return cb(null, false, {message: 'Incorrect email or password.'});
-               }
-               return cb(null, user, {message: 'Logged In Successfully'});
-          })
-          .catch(err => cb(err));
-    }
-));
+// passport.use(new LocalStrategy({
+//         usernameField: 'usernameOrEmail',
+//         passwordField: 'password'
+//     }, 
+//     function (usernameOrEmail, password, cb) {
+//         let user;
+//         let correctPassword = "";
 
-passport.use(new JWTStrategy({
-    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey   : 'your_jwt_secret'
-},
-function (jwtPayload, cb) {
-
-    //find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
-    return UserModel.findOneById(jwtPayload.id)
-        .then(user => {
-            return cb(null, user);
-        })
-        .catch(err => {
-            return cb(err);
-        });
-}
-));
+//         knex.raw("CALL getUserByUsernameOrEmail(?)", [usernameOrEmail])
+//         .then((val) => {
+//             // console.log("val:", val[0][0]);
+//             if(val[0][0].length != 0) {
+//                 user = val[0][0][0];
+//                 correctPassword = user['password'];
+//                 console.log(correctPassword);
+//             } else {
+//                 console.log("User does not exist.");
+//                 return cb(null, false, {message: "User does not exist."});
+//             }
+//         })
+//         .then(async () => {
+//             if (await bcrypt.compare(password, correctPassword)) {
+//                 console.log("Password is correct.");
+//                 return cb(null, user, {message: "Logged in successfully."});
+//             } else {
+//                 console.log("Password is incorrect.");
+//                 return cb(null, false, {message: "Password is incorrect."});
+//             }
+//         })
+//         .catch((err) => {
+//             console.log("inside catch in loginUser repo");
+//             console.log("err:", err);
+//             cb(err);
+//         })
+//         .finally(() => knex.destroy);
+//     }
+// ));

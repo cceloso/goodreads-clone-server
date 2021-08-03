@@ -22,7 +22,7 @@ const usersRepo = {
 
         knex.raw("CALL getUserByUsernameOrEmail(?)", [user.usernameOrEmail])
         .then((val) => {
-            console.log("val:", val[0][0]);
+            // console.log("val:", val[0][0]);
             if(val[0][0].length != 0) {
                 correctPassword = val[0][0][0]['password'];
             } else {
@@ -33,15 +33,56 @@ const usersRepo = {
         .then(async () => {
             if (await bcrypt.compare(user.password, correctPassword)) {
                 console.log("password is correct");
+                return true;
             } else {
                 console.log("password is incorrect");
+                return false;
             }
         })
         .catch((err) => {
             console.log("inside catch in loginUser repo");
             console.log("err:", err);
+            return false;
         })
         .finally(() => knex.destroy);
+    },
+    
+    loginUser2: (user) => {
+        let correctPassword = "";
+        let userObject;
+
+        return new Promise((resolve, reject) => {
+            knex.raw("CALL getUserByUsernameOrEmail(?)", [user.usernameOrEmail])
+            .then((val) => {
+                // console.log("val:", val[0][0]);
+                if(val[0][0].length != 0) {
+                    userObject = val[0][0][0];
+                    correctPassword = userObject.password;
+                } else {
+                    // throw("User does not exist.");
+                    reject("user dne");
+                }
+                console.log(correctPassword);
+            })
+            .then(async () => {
+                if (await bcrypt.compare(user.password, correctPassword)) {
+                    console.log("password is correct");
+                    // return userObject;
+                    resolve(userObject);
+                } else {
+                    console.log("password is incorrect");
+                    // return undefined;
+                    reject("incorrect pw");
+                }
+            })
+            .catch((err) => {
+                console.log("inside catch in loginUser repo");
+                console.log("err:", err);
+                // return undefined;
+                reject(err);
+            })
+            .finally(() => knex.destroy);
+        });
     },
 
     // addUser: (userId, newUser) => {

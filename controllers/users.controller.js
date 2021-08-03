@@ -96,8 +96,9 @@ const controller = {
                 else {
                     let userId = userIndex;
                     usersRepo.addUser(userId, req.body)
-                        .then(() => {
+                        .then((val) => {
                             userIndex++;
+                            console.log("val:", val[0][0]);
                             resolve("Signup successful.");
                         })
                         .catch((err) => {
