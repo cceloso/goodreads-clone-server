@@ -7,6 +7,10 @@ var cors = require('cors');
 // require('./passport');
 var bcrypt = require('bcrypt');
 
+var passport = require('passport');
+var initializePassport = require('./passport-config');
+initializePassport(passport);
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var booksRouter = require('./routes/books');

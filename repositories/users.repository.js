@@ -12,18 +12,40 @@ const usersRepo = {
         .finally(() => knex.destroy);
     },
 
+    // loginUser: (user) => {
+    //     return knex.raw("CALL loginUser(?, ?)", [user.usernameOrEmail, user.password])
+    //     .finally(() => knex.destroy);
+    // },
+
     loginUser: (user) => {
-        return knex.raw("CALL loginUser(?, ?)", [user.usernameOrEmail, user.password])
+        let correctPassword = "";
+
+        knex.raw("CALL getUserByUsernameOrEmail(?)", [user.usernameOrEmail])
+        .then((val) => {
+            console.log("val:", val[0][0]);
+            if(val[0][0].length != 0) {
+                correctPassword = val[0][0][0]['password'];
+            } else {
+                throw("User does not exist.");
+            }
+            console.log(correctPassword);
+        })
+        .then(async () => {
+            if (await bcrypt.compare(user.password, correctPassword)) {
+                console.log("password is correct");
+            } else {
+                console.log("password is incorrect");
+            }
+        })
+        .catch((err) => {
+            console.log("inside catch in loginUser repo");
+            console.log("err:", err);
+        })
         .finally(() => knex.destroy);
     },
 
     // addUser: (userId, newUser) => {
     //     return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, newUser.password, newUser.imageUrl, "guest"])
-    //     .finally(() => knex.destroy);
-    // },
-
-    // addUser: (userId, newUser, password) => {
-    //     return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, password, newUser.imageUrl, "guest"])
     //     .finally(() => knex.destroy);
     // },
 
@@ -33,9 +55,9 @@ const usersRepo = {
             console.log(hashedPassword);
             return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
             .finally(() => knex.destroy);
-        } catch {
-            console.log("inside catch");
-            return;
+        } catch(err) {
+            console.log("inside catch in addUser in repo");
+            return err;
         }
     },
     

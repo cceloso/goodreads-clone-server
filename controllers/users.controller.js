@@ -2,7 +2,7 @@ const responsesController = require('./responses.controller');
 const usersRepo = require('../repositories/users.repository');
 const bcrypt = require('bcrypt');
 
-let userIndex = 5;
+let userIndex = 1;
 
 const controller = {
     getUser: (req, res) => {
@@ -68,25 +68,30 @@ const controller = {
                 //     errorCode = 400;
                 //     reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
                 // } 
-                if(Object.keys(req.body).length == 2) {
-                    usersRepo.loginUser(req.body)
-                    .then((val) => {
-                        const loginResult = val[0][0][0]['v_loginResult'];
 
-                        if(loginResult === "SUCCESS") {
-                            resolve("Login successful.");
-                        } else if(loginResult === "INVALID_PASSWORD") {
-                            errorCode = 403;
-                            reject(responsesController.createErrorMessage(403, "Invalid password.", "PERMISSION_DENIED"));
-                        } else if(loginResult === "INVALID_USER") {
-                            errorCode = 403;
-                            reject(responsesController.createErrorMessage(403, "Invalid username or email address.", "PERMISSION_DENIED"));
-                        }
-                    })
-                    .catch((err) => {
-                        errorCode = 500;
-                        reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                    })
+                if(Object.keys(req.body).length == 2) {
+                    usersRepo.loginUser(req.body);
+                    resolve("test2");
+                    // .then((val) => {
+                    //     console.log("inside loginUser controller");
+                    //     console.log(val[0][0][0]['password']);
+                    //     const loginResult = val[0][0][0]['v_loginResult'];
+
+                    //     resolve("test");
+                        // if(loginResult === "SUCCESS") {
+                        //     resolve("Login successful.");
+                        // } else if(loginResult === "INVALID_PASSWORD") {
+                        //     errorCode = 403;
+                        //     reject(responsesController.createErrorMessage(403, "Invalid password.", "PERMISSION_DENIED"));
+                        // } else if(loginResult === "INVALID_USER") {
+                        //     errorCode = 403;
+                        //     reject(responsesController.createErrorMessage(403, "Invalid username or email address.", "PERMISSION_DENIED"));
+                        // }
+                    // })
+                    // .catch((err) => {
+                    //     errorCode = 500;
+                    //     reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+                    // })
                 }
                 else {
                     let userId = userIndex;
