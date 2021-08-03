@@ -4,11 +4,15 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
+// require('./passport');
+var bcrypt = require('bcrypt');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var booksRouter = require('./routes/books');
 var genresRouter = require('./routes/genres');
+// const auth = require('./routes/auth');
+// app.use('/auth', auth);
 
 var app = express();
 

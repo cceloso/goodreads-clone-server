@@ -6,7 +6,7 @@ CREATE TABLE `users` (
     `lastname` VARCHAR(48) NOT NULL,
     `username` VARCHAR(48) UNIQUE NOT NULL,
     `email` VARCHAR(128) UNIQUE NOT NULL,
-    `password` VARCHAR(48) NOT NULL,
+    `password` CHAR(60) NOT NULL,
     `createdAt` DATE NOT NULL,
     `imageUrl` VARCHAR(255) NOT NULL,
     `role` VARCHAR(16) NOT NULL
@@ -18,7 +18,7 @@ CREATE PROCEDURE `postUser`(
     IN `p_lastname` VARCHAR(48),
     IN `p_username` VARCHAR(48),
     IN `p_email` VARCHAR(128),
-    IN `p_password` VARCHAR(48),
+    IN `p_password` CHAR(60),
     IN `p_imageUrl` VARCHAR(255),
     IN `p_role` VARCHAR(48)
 )
@@ -42,7 +42,7 @@ END;
 
 CREATE PROCEDURE `getUser`(
 	IN `p_username` VARCHAR(48),
-    IN `p_password` VARCHAR(48)
+    IN `p_password` CHAR(60)
 )
 BEGIN
 	SELECT *  FROM `users`
@@ -51,7 +51,7 @@ END;
 
 CREATE PROCEDURE `loginUser`(
 	IN `p_usernameOrEmail` VARCHAR(255),
-    IN `p_password` VARCHAR(255)
+    IN `p_password` CHAR(60)
 )
 BEGIN
 	DECLARE `v_selectedUser` INT;
@@ -83,7 +83,7 @@ CREATE PROCEDURE `putUser`(
     IN `p_lastname` VARCHAR(48),
     IN `p_username` VARCHAR(48),
     IN `p_email` VARCHAR(128),
-    IN `p_password` VARCHAR(48),
+    IN `p_password` CHAR(60),
     IN `p_imageUrl` VARCHAR(255)
 )
 BEGIN

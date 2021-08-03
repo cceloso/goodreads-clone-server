@@ -1,4 +1,5 @@
 const knex = require('./knex');
+const bcrypt = require('bcrypt');
 
 const usersRepo = {
     getAllUsers: () => {
@@ -16,9 +17,26 @@ const usersRepo = {
         .finally(() => knex.destroy);
     },
 
-    addUser: (userId, newUser) => {
-        return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, newUser.password, newUser.imageUrl, "guest"])
-        .finally(() => knex.destroy);
+    // addUser: (userId, newUser) => {
+    //     return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, newUser.password, newUser.imageUrl, "guest"])
+    //     .finally(() => knex.destroy);
+    // },
+
+    // addUser: (userId, newUser, password) => {
+    //     return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, password, newUser.imageUrl, "guest"])
+    //     .finally(() => knex.destroy);
+    // },
+
+    addUser: async (userId, newUser) => {
+        try {
+            const hashedPassword = await bcrypt.hash(newUser.password, 10);
+            console.log(hashedPassword);
+            return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
+            .finally(() => knex.destroy);
+        } catch {
+            console.log("inside catch");
+            return;
+        }
     },
     
     editUser: (userId, updatedUser) => {

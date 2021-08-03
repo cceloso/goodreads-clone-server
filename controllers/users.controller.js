@@ -1,7 +1,8 @@
 const responsesController = require('./responses.controller');
 const usersRepo = require('../repositories/users.repository');
+const bcrypt = require('bcrypt');
 
-let userIndex = 1;
+let userIndex = 5;
 
 const controller = {
     getUser: (req, res) => {
@@ -54,21 +55,21 @@ const controller = {
                 reject(responsesController.createErrorMessage(400, "User id parameter is set. If you intend to edit the user with this id, please send a PUT request; else, please remove id parameter.", "INVALID_ARGUMENT"));
             }
 
-            else if(!req.body.data) {
+            else if(!req.body) {
                 errorCode = 400;
                 reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
             }
 
             else {
-                // if(Object.keys(req.body.data).length < expectedAttributes) {
+                // if(Object.keys(req.body).length < expectedAttributes) {
                 //     errorCode = 400;
                 //     reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-                // } else if(Object.keys(req.body.data).length > expectedAttributes) {
+                // } else if(Object.keys(req.body).length > expectedAttributes) {
                 //     errorCode = 400;
                 //     reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
                 // } 
-                if(Object.keys(req.body.data).length == 2) {
-                    usersRepo.loginUser(req.body.data)
+                if(Object.keys(req.body).length == 2) {
+                    usersRepo.loginUser(req.body)
                     .then((val) => {
                         const loginResult = val[0][0][0]['v_loginResult'];
 
@@ -89,7 +90,7 @@ const controller = {
                 }
                 else {
                     let userId = userIndex;
-                    usersRepo.addUser(userId, req.body.data)
+                    usersRepo.addUser(userId, req.body)
                         .then(() => {
                             userIndex++;
                             resolve("Signup successful.");
@@ -110,6 +111,7 @@ const controller = {
                             }
 
                             else {
+                                console.log("err:", err);
                                 errorCode = 500;
                                 reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
                             }
