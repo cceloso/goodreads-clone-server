@@ -1,8 +1,13 @@
 const knex = require('./knex');
 
 const genresRepo = {
+    // getAllGenres: () => {
+    //     return knex.raw("CALL getAllGenres()")
+    //     .finally(() => knex.destroy);
+    // },
+
     getAllGenres: () => {
-        return knex.raw("CALL getAllGenres()")
+        return knex.raw("CALL getAllGenres_new()")
         .finally(() => knex.destroy);
     },
 

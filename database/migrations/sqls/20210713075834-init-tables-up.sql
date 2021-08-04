@@ -120,7 +120,49 @@ BEGIN
 END;
 
 
--- BOOKS
+-- BOOKS NEW
+
+CREATE TABLE `books_flat` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `author` VARCHAR(255) NOT NULL,
+    `isbn` VARCHAR(255) NOT NULL,
+    `publisher` VARCHAR(255) NOT NULL,
+    `published` YEAR NOT NULL,
+    `description` TEXT NOT NULL,
+    `genres` JSON NOT NULL,
+    `imageUrl` VARCHAR(255) NOT NULL,
+    `totalRating` FLOAT(3, 2) NOT NULL,
+    `averageRating` FLOAT(3, 2) NOT NULL,
+    `ratingCtr` INT NOT NULL,
+    CONSTRAINT `titleAndAuthor` UNIQUE(`title`, `author`)
+);
+
+CREATE PROCEDURE `postBook_flat`(
+	IN `p_title` VARCHAR(255),
+    IN `p_author` VARCHAR(255),
+    IN `p_isbn` VARCHAR(255),
+    IN `p_publisher` VARCHAR(255),
+    IN `p_published` YEAR,
+    IN `p_description` TEXT,
+    IN `p_genres` JSON,
+    IN `p_imageUrl` VARCHAR(255)
+)
+BEGIN
+	INSERT INTO `books_flat` (`title`, `author`, `isbn`, `publisher`, `published`, `description`, `genres`, `imageUrl`, `totalRating`, `averageRating`, `ratingCtr`)
+    VALUES (`p_title`, `p_author`, `p_isbn`, `p_publisher`, `p_published`, `p_description`, `p_genres`, `p_imageUrl`, 0, 0, 0);
+END;
+
+CREATE PROCEDURE `getBooksByGenre_flat`(
+	IN `p_genre` VARCHAR(255)
+)
+BEGIN
+	SELECT *
+    FROM `books_flat`
+    WHERE `JSON_CONTAINS`(`genres`, `p_genre`);
+END;
+
+-- BOOKS OLD
 
 CREATE TABLE `authors` (
     `id` VARCHAR(48) NOT NULL PRIMARY KEY,
@@ -421,7 +463,27 @@ BEGIN
 END;
 
 
--- GENRES
+-- GENRES NEW
+
+CREATE TABLE `genres_new` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE PROCEDURE `postGenre_new`(
+	IN `p_name` VARCHAR(255)
+)
+BEGIN
+	INSERT IGNORE INTO `genres_new` (`name`)
+    VALUES (`p_name`);
+END;
+
+CREATE PROCEDURE `getAllGenres_new`()
+BEGIN
+	SELECT *  FROM `genres_new`;
+END;
+
+-- GENRES OLD
 
 CREATE TABLE `genres` (
     `id` VARCHAR(48) NOT NULL PRIMARY KEY,
@@ -792,3 +854,55 @@ BEGIN
 		WHERE `id` = `p_id`;
     END IF;
 END;
+
+
+-- SEED GENRES
+
+CALL `postGenre_new`("adult");
+CALL `postGenre_new`("biography");
+CALL `postGenre_new`("chick-lit");
+CALL `postGenre_new`("children's");
+CALL `postGenre_new`("crime");
+CALL `postGenre_new`("fantasy");
+CALL `postGenre_new`("fiction");
+CALL `postGenre_new`("graphic-novels");
+CALL `postGenre_new`("historical-fiction");
+CALL `postGenre_new`("history");
+CALL `postGenre_new`("horror");
+CALL `postGenre_new`("mystery");
+CALL `postGenre_new`("paranormal");
+CALL `postGenre_new`("politics");
+CALL `postGenre_new`("romance");
+CALL `postGenre_new`("science");
+CALL `postGenre_new`("science-fiction");
+CALL `postGenre_new`("suspense");
+CALL `postGenre_new`("thriller");
+CALL `postGenre_new`("young-adult");
+CALL `postGenre_new`("art");
+CALL `postGenre_new`("business");
+CALL `postGenre_new`("classics");
+CALL `postGenre_new`("comics");
+CALL `postGenre_new`("contemporary");
+CALL `postGenre_new`("cookbooks");
+CALL `postGenre_new`("gay-and-lesbian");
+CALL `postGenre_new`("humor-and-comedy");
+CALL `postGenre_new`("manga");
+CALL `postGenre_new`("memoir");
+CALL `postGenre_new`("music");
+CALL `postGenre_new`("nonfiction");
+CALL `postGenre_new`("philosophy");
+CALL `postGenre_new`("poetry");
+CALL `postGenre_new`("psychology");
+CALL `postGenre_new`("romance");
+CALL `postGenre_new`("self-help");
+CALL `postGenre_new`("spirituality");
+CALL `postGenre_new`("sports");
+CALL `postGenre_new`("travel");
+CALL `postGenre_new`("apocalyptic");
+CALL `postGenre_new`("politics");
+CALL `postGenre_new`("literature");
+CALL `postGenre_new`("adventure");
+CALL `postGenre_new`("novels");
+CALL `postGenre_new`("inspirational");
+CALL `postGenre_new`("mythology");
+CALL `postGenre_new`("historical");

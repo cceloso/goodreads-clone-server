@@ -36,8 +36,13 @@ const booksRepo = {
         .finally(() => knex.destroy);
     },
 
-    addBook: (bookId, authorId, newBook) => {
-        return knex.raw("CALL postBook(?, ?, ?, ?, ?, ?, ?, ?, ?)", [bookId, newBook.title, authorId, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, newBook.imageUrl])
+    // addBook: (bookId, authorId, newBook) => {
+    //     return knex.raw("CALL postBook(?, ?, ?, ?, ?, ?, ?, ?, ?)", [bookId, newBook.title, authorId, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, newBook.imageUrl])
+    //     .finally(() => knex.destroy);
+    // },
+
+    addBook: (newBook) => {
+        return knex.raw("CALL postBook_flat(?, ?, ?, ?, ?, ?, ?, ?)", [newBook.title, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, JSON.stringify(newBook.genres), newBook.imageUrl])
         .finally(() => knex.destroy);
     },
 
