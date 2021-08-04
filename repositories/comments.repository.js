@@ -11,8 +11,8 @@ const usersRepo = {
         .finally(() => knex.destroy);
     },
 
-    addComment: (commentId, newComment, bookId, reviewId, userId) => {
-        return knex.raw("CALL postComment(?, ?, ?, ?, ?)", [commentId, newComment.comment, bookId, reviewId, userId])
+    addComment: (newComment, bookId, reviewId, userId, userName) => {
+        return knex.raw("CALL postComment_flat(?, ?, ?, ?, ?)", [newComment.comment, bookId, reviewId, userId, userName])
         .finally(() => knex.destroy);
     },
     

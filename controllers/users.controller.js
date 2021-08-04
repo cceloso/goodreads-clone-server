@@ -94,8 +94,9 @@ const controller = {
                     // })
                 }
                 else {
-                    let userId = userIndex;
-                    usersRepo.addUser(userId, req.body)
+                    // let userId = userIndex;
+                    // usersRepo.addUser(userId, req.body)
+                    usersRepo.addUser(req.body)
                         .then((val) => {
                             userIndex++;
                             console.log("val:", val[0][0]);

@@ -11,8 +11,13 @@ const booksRepo = {
         .finally(() => knex.destroy);
     },
 
+    // getBooksByGenre: (genreId) => {
+    //     return knex.raw("CALL getBooksByGenre(?)", [genreId])
+    //     .finally(() => knex.destroy);
+    // },
+
     getBooksByGenre: (genreId) => {
-        return knex.raw("CALL getBooksByGenre(?)", [genreId])
+        return knex.raw("CALL getBooksByGenre_flat(?)", [JSON.stringify(genreId)])
         .finally(() => knex.destroy);
     },
 

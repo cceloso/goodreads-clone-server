@@ -1,112 +1,72 @@
 const responsesController = require('./responses.controller');
 const reviewsRepo = require('../repositories/reviews.repository');
+const usersRepo = require('../repositories/users.repository');
 let reviewIndex = 1;
 
 const controller = {
     getReview: (req, res) => {
-        new Promise((resolve, reject) => {
-            if(!req.params.reviewId) {
-                console.log("from getAllReviews: ");
-                reviewsRepo.getAllReviews(req.params.bookId)
-                .then((val) => {
-                    let reviews = val[0][0];
-                    resolve(reviews);
-                })
-                .catch((err) => {
-                    errorCode = 500;
-                    reject(responsesController.createErrorMessage(500, err, "ERROR"));
-                })
-            }
-
-            else {
-                console.log("from getReview: ");
-                reviewsRepo.getReview(req.params.reviewId)
-                    .then((val) => {
-                        let review = val[0][0];
-                        if(review.length == 0) {
-                            errorCode = 404;
-                            reject(responsesController.createErrorMessage(404, "Review not found. Please provide a valid review id.", "NOT_FOUND"));
-                        } else {
-                            resolve(review);
-                        }
-                    })
-                    .catch((err) => {
-                        errorCode = 500;
-                        reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                    })
-            }
-        })
-        .then((reviewsToDisplay) => {
-            res.status(200).json(reviewsToDisplay);
-        })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
-        })
+        if(!req.params.reviewId) {
+            console.log("from getReviews: ");
+            reviewsRepo.getReviews(req.params.bookId)
+            .then((val) => {
+                let reviews = val[0][0];
+                res.status(200).json(reviews);
+            })
+            .catch((err) => {
+                errorCode = 500;
+                res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
+            })
+        } else {
+            console.log("from getReview: ");
+            reviewsRepo.getReview(req.params.reviewId)
+            .then((val) => {
+                let review = val[0][0];
+                if(review.length == 0) {
+                    errorCode = 404;
+                    res.status(errorCode).json(responsesController.createErrorMessage(404, "Review not found. Please provide a valid review id.", "NOT_FOUND"));
+                } else {
+                    res.status(200).json(review);
+                }
+            })
+            .catch((err) => {
+                errorCode = 500;
+                res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
+            })
+        }
     },
 
     postReview: (req, res) => {
-        new Promise((resolve, reject) => {
-            const expectedAttributes = 2;
+        const bookId = req.params.bookId;
+        const query = req.url.split('?')[1];
+        const urlParams = new URLSearchParams(query);
+        const userId = urlParams.get("userId");
+        let userName = "";
+        console.log(`bookId: ${bookId}`);
+        console.log(`userId: ${userId}`);
 
-            if(!req.body) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
-            }
-
-            else {
-                if(Object.keys(req.body).length < expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-                } else if(Object.keys(req.body).length > expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
-                } else {
-                    let reviewId = reviewIndex;
-                    const bookId = req.params.bookId;
-                    const query = req.url.split('?')[1];
-                    const urlParams = new URLSearchParams(query);
-                    const userId = urlParams.get("userId");
-                    console.log(`bookId: ${bookId}`);
-                    console.log(`userId: ${userId}`);
-
-                    // resolve();
-                    console.log(`reviewIndex: ${reviewIndex}`);
-
-                    reviewsRepo.addReview(reviewId, req.body, bookId, userId)
-                    .then(() => {
-                        reviewIndex++;
-                        console.log(`nextReviewIndex: ${reviewIndex}`);
-                        // console.log("success");
-                        resolve();
-                    })
-                    .catch((err) => {
-                        if(err.code == 'ER_DUP_ENTRY') {
-                            let dupEntryMessage = err.sqlMessage.split(' ');
-                            let dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
-                            errorCode = 409;
-
-                            if(dupEntryKey == `'bookAndUser'`) {
-                                reject(responsesController.createErrorMessage(409, "User already posted a review for the book.", "ALREADY_EXISTS"));
-                            } else if(dupEntryKey == `'PRIMARY'`) {
-                                reject(responsesController.createErrorMessage(409, "Review with that id already exists.", "ALREADY_EXISTS"));
-                            }
-                        }
-
-                        else {
-                            errorCode = 500;
-                            reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                        }
-                    })
-                }
-            }
+        usersRepo.getUserById(userId)  
+        .then((val) => {
+            userName = val[0][0][0]['userName'];
+            console.log("userName:", userName);
         })
+        .then(() => reviewsRepo.addReview(req.body, bookId, userId, userName))
+        .then(() => reviewsRepo.updateTotalRating(req.body.rating, bookId))
+        .then(() => reviewsRepo.updateAverageRating(bookId))
         .then(() => {
             res.status(201).json({
                 message: "Successfully added a review."
             });
         })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
+        // .then(() => {
+        //     reviewsRepo.addReview(req.body, bookId, userId, userName)
+        //     .then(() => {
+        //         res.status(201).json({
+        //             message: "Successfully added a review."
+        //         });
+        //     })
+        // })
+        .catch((err) => {
+            res.status(400).json(responsesController.createErrorMessage(400, err, "error in posting review"));
         })
     },
 

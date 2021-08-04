@@ -1,4 +1,35 @@
--- USERS
+-- USERS NEW
+
+CREATE TABLE `users_new` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `firstName` VARCHAR(255) NOT NULL,
+    `lastName` VARCHAR(255) NOT NULL,
+    `userName` VARCHAR(255) UNIQUE NOT NULL,
+    `email` VARCHAR(255) UNIQUE NOT NULL,
+    `password` CHAR(60) NOT NULL,
+    `dateCreated` TIMESTAMP NOT NULL,
+    `imageUrl` VARCHAR(255) NOT NULL,
+    `role` VARCHAR(255) NOT NULL
+);
+
+CREATE PROCEDURE `postUser_new`(
+	IN `p_firstName` VARCHAR(255),
+    IN `p_lastName` VARCHAR(255),
+    IN `p_userName` VARCHAR(255),
+    IN `p_email` VARCHAR(255),
+    IN `p_password` CHAR(60),
+    IN `p_imageUrl` VARCHAR(255),
+    IN `p_role` VARCHAR(255)
+)
+BEGIN
+	INSERT INTO `users_new` (`firstName`, `lastName`, `userName`, `email`, `password`, `dateCreated`, `imageUrl`, `role`)
+    VALUES (`p_firstName`, `p_lastName`, `p_userName`, `p_email`, `p_password`, NOW(), `p_imageUrl`, `p_role`);
+
+    SELECT * FROM `users_new`
+    WHERE `userName` = `p_userName`;
+END;
+
+-- USERS OLD
 
 CREATE TABLE `users` (
     `id` VARCHAR(48) NOT NULL PRIMARY KEY,
@@ -53,10 +84,10 @@ BEGIN
 END;
 
 CREATE PROCEDURE `getUserById`(
-	IN `p_id` VARCHAR(48)
+	IN `p_id` INT
 )
 BEGIN
-	SELECT *  FROM `users`
+	SELECT *  FROM `users_new`
     WHERE `id` = `p_id`;
 END;
 
@@ -64,7 +95,7 @@ CREATE PROCEDURE `getUserByUsernameOrEmail`(
 	IN `p_usernameOrEmail` VARCHAR(255)
 )
 BEGIN
-	SELECT *  FROM `users`
+	SELECT *  FROM `users_new`
     WHERE `username` = `p_usernameOrEmail` OR `email` = `p_usernameOrEmail`;
 END;
 
@@ -77,13 +108,13 @@ BEGIN
     -- DECLARE `v_loginResult` VARCHAR(255);
     DECLARE v_loginResult VARCHAR(255);
     
-	SELECT COUNT(*) INTO `v_selectedUser`  FROM `users`
+	SELECT COUNT(*) INTO `v_selectedUser`  FROM `users_new`
     WHERE (`username` = `p_usernameOrEmail` OR `email` = `p_usernameOrEmail`) AND `password` = `p_password`;
     
     IF `v_selectedUser` = 1 THEN
 		SET v_loginResult = "SUCCESS";
 	ELSE
-		SELECT COUNT(*) INTO `v_selectedUser` FROM `users`
+		SELECT COUNT(*) INTO `v_selectedUser` FROM `users_new`
         WHERE `username` = `p_usernameOrEmail` OR `email` = `p_usernameOrEmail`;
         
         IF `v_selectedUser` = 1 THEN
@@ -352,15 +383,6 @@ BEGIN
     WHERE `id` = `p_id`;
 END;
 
--- CREATE PROCEDURE `getGenreByName`(
--- 	IN `p_name` VARCHAR(255),
---     OUT `genreId` VARCHAR(48)
--- )
--- BEGIN
--- 	SELECT `id` INTO `genreId` FROM `genres`
---     WHERE `name` = `p_name`;
--- END;
-
 CREATE PROCEDURE `putAuthor`(
 	IN `p_id` VARCHAR(48),
 	IN `p_name` VARCHAR(255)
@@ -586,7 +608,51 @@ BEGIN
 END;
 
 
--- REVIEWS
+-- REVIEW NEW
+
+CREATE TABLE `reviews_flat` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `rating` FLOAT(3, 2) NOT NULL,
+    `review` TEXT NOT NULL,
+    `dateCreated` DATE NOT NULL,
+    `bookId` INT NOT NULL,
+    `userId` INT NOT NULL,
+    `userName` VARCHAR(255) NOT NULL
+);
+
+CREATE PROCEDURE `postReview_flat`(
+    IN `p_rating` FLOAT(3, 2),
+    IN `p_review` TEXT,
+    IN `p_bookId` INT,
+    IN `p_userId` INT,
+    IN `p_userName` VARCHAR(255)
+)
+BEGIN
+-- 	Insert review
+	INSERT INTO `reviews_flat` (`rating`, `review`, `dateCreated`, `bookId`, `userId`, `userName`)
+    VALUES (`p_rating`, `p_review`, CURDATE(), `p_bookId`, `p_userId`, `p_userName`);
+END;
+
+CREATE PROCEDURE `updateTotalRating_flat`(
+    IN `p_rating` FLOAT(3, 2),
+    IN `p_bookId` INT
+)
+BEGIN
+    UPDATE `books_flat`
+    SET `totalRating` = `totalRating` + `p_rating`, `ratingCtr` = `ratingCtr` + 1
+    WHERE `id` = `p_bookId`;
+END;
+
+CREATE PROCEDURE `updateAverageRating_flat`(
+    IN `p_bookId` INT
+)
+BEGIN
+    UPDATE `books_flat`
+    SET `averageRating` = `totalRating` / `ratingCtr`
+    WHERE `id` = `p_bookId`;
+END;
+
+-- REVIEWS OLD
 
 CREATE TABLE `reviews` (
     `id` VARCHAR(48) NOT NULL PRIMARY KEY,
@@ -604,11 +670,11 @@ CREATE TABLE `reviews` (
     CONSTRAINT `bookAndUser` UNIQUE(`bookId`, `userId`)
 );
 
-CREATE PROCEDURE `getAllReviews`(
-	IN `p_bookId` VARCHAR(48)
+CREATE PROCEDURE `getReviews`(
+	IN `p_bookId` INT
 )
 BEGIN
-	SELECT *  FROM `reviews`
+	SELECT *  FROM `reviews_flat`
     WHERE `bookId` = `p_bookId`;
 END;
 
@@ -750,7 +816,32 @@ BEGIN
     END IF;
 END;
 
--- COMMENTS
+-- COMMENTS NEW
+
+CREATE TABLE `comments_flat` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `comment` TEXT NOT NULL,
+    `dateCreated` TIMESTAMP NOT NULL,
+    `bookId` INT NOT NULL,
+    `reviewId` INT NOT NULL,
+    `userId` INT NOT NULL,
+    `userName` VARCHAR(255) NOT NULL
+);
+
+CREATE PROCEDURE `postComment_flat`(
+    IN `p_comment` TEXT,
+    IN `p_bookId` INT,
+    IN `p_reviewId` INT,
+    IN `p_userId` INT,
+    IN `p_userName` VARCHAR(255)
+)
+BEGIN
+    -- 	Insert review
+    INSERT INTO `comments_flat` (`comment`, `dateCreated`, `bookId`, `reviewId`, `userId`, `userName`)
+    VALUES (`p_comment`, NOW(), `p_bookId`, `p_reviewId`, `p_userId`, `p_userName`);
+END;
+
+-- COMMENTS OLD
 
 CREATE TABLE `comments` (
     `id` VARCHAR(48) NOT NULL PRIMARY KEY,

@@ -1,5 +1,6 @@
 const responsesController = require('./responses.controller');
 const commentsRepo = require('../repositories/comments.repository');
+const usersRepo = require('../repositories/users.repository');
 let commentIndex = 1;
 
 const controller = {
@@ -45,63 +46,32 @@ const controller = {
     },
 
     postComment: (req, res) => {
-        new Promise((resolve, reject) => {
-            const expectedAttributes = 1;
+        const bookId = req.params.bookId;
+        const reviewId = req.params.reviewId;
+        const query = req.url.split('?')[1];
+        const urlParams = new URLSearchParams(query);
+        const userId = urlParams.get("userId");
+        let userName = "";
+        console.log(`bookId: ${bookId}`);
+        console.log(`reviewId: ${reviewId}`);
+        console.log(`userId: ${userId}`);
 
-            if(!req.body) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
-            }
-
-            else {
-                if(Object.keys(req.body).length < expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-                } else if(Object.keys(req.body).length > expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
-                } else {
-                    let commentId = commentIndex;
-                    const bookId = req.params.bookId;
-                    const reviewId = req.params.reviewId;
-                    const query = req.url.split('?')[1];
-                    const urlParams = new URLSearchParams(query);
-                    const userId = urlParams.get("userId");
-                    console.log(`bookId: ${bookId}`);
-                    console.log(`reviewId: ${reviewId}`);
-                    console.log(`userId: ${userId}`);
-
-                    commentsRepo.addComment(commentId, req.body, bookId, reviewId, userId)
-                    .then(() => {
-                        commentIndex++;
-                        resolve();
-                    })
-                    .catch((err) => {
-                        if(err.code == 'ER_DUP_ENTRY') {
-                            let dupEntryMessage = err.sqlMessage.split(' ');
-                            let dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
-                            errorCode = 409;
-
-                            if(dupEntryKey == `'PRIMARY'`) {
-                                reject(responsesController.createErrorMessage(409, "Comment with that id already exists.", "ALREADY_EXISTS"));
-                            }
-                        }
-
-                        else {
-                            errorCode = 500;
-                            reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                        }
-                    })
-                }
-            }
+        usersRepo.getUserById(userId)  
+        .then((val) => {
+            userName = val[0][0][0]['userName'];
+            console.log("userName:", userName);
         })
         .then(() => {
-            res.status(201).json({
-                message: "Successfully added a comment."
-            });
+            commentsRepo.addComment(req.body, bookId, reviewId, userId, userName)
+            .then(() => {
+                res.status(201).json({
+                    message: "Successfully added a comment."
+                });
+            })
         })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
+        .catch((err) => {
+            errorCode = 500;
+            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
         })
     },
 

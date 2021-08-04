@@ -97,14 +97,27 @@ const usersRepo = {
     //     .finally(() => knex.destroy);
     // },
 
-    addUser: async (userId, newUser) => {
+    // addUser: async (userId, newUser) => {
+    //     try {
+    //         const hashedPassword = await bcrypt.hash(newUser.password, 10);
+    //         console.log(hashedPassword);
+    //         return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
+    //         .finally(() => knex.destroy);
+    //     } catch(err) {
+    //         console.log("inside catch in addUser in repo");
+    //         return err;
+    //     }
+    // },
+
+    addUser: async (newUser) => {
         try {
             const hashedPassword = await bcrypt.hash(newUser.password, 10);
             console.log(hashedPassword);
-            return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
+            return knex.raw("CALL postUser_new(?, ?, ?, ?, ?, ?, ?)", [newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
             .finally(() => knex.destroy);
         } catch(err) {
             console.log("inside catch in addUser in repo");
+            console.log("err:", err);
             return err;
         }
     },

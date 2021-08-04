@@ -38,9 +38,7 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/signup', (req, res, next) => {
-    const userId = userIndex;
-
-    usersRepo.addUser(userId, req.body)
+    usersRepo.addUser(req.body)
     .then((val) => {
         userIndex++;
         let user = val[0][0][0];
