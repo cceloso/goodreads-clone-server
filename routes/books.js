@@ -32,16 +32,16 @@ router.delete('/:bookId', controller.deleteBook);
 router.get('/?genre=:genreId', controller.getBooks);
 
 
-/* -- GENRES -- */
+// /* -- GENRES -- */
 
-/* View genres of a book */
-router.get('/:bookId/genres', controller.getBookGenre);
+// /* View genres of a book */
+// router.get('/:bookId/genres', controller.getBookGenre);
 
-/* Add genre to a book */
-router.post('/:bookId/genres', controller.postBookGenre);
+// /* Add genre to a book */
+// router.post('/:bookId/genres', controller.postBookGenre);
 
-/* Delete genre of a book */
-router.delete('/:bookId/genres/:genreId', controller.deleteBookAndGenre);
+// /* Delete genre of a book */
+// router.delete('/:bookId/genres/:genreId', controller.deleteBookAndGenre);
 
 
 /* -- REVIEWS -- */

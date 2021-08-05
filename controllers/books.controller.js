@@ -2,9 +2,8 @@ const responsesController = require('./responses.controller');
 const booksRepo = require('../repositories/books.repository');
 const reviewsRepo = require('../repositories/reviews.repository');
 const commentsRepo = require('../repositories/comments.repository');
-
-const { nanoid } = require('nanoid');
 const url = require('url');
+// const { nanoid } = require('nanoid');
 
 const controller = {
     getBook: (req, res) => {
@@ -105,119 +104,6 @@ const controller = {
         .catch((err) => {
             errorCode = 500;
             res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
-        })
-    },
-
-    getBookGenre: (req, res) => {
-        new Promise((resolve, reject) => {
-            if(!req.params.bookId) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(404, "Book id parameter is empty.", "INVALID_ARGUMENT"));
-            }
-
-            else {
-                booksRepo.getBookGenre(req.params.bookId)
-                .then((val) => {
-                    let result = val[0][0];
-                    if(result.length == 0) {
-                        errorCode = 404;
-                        reject(responsesController.createErrorMessage(404, "Book not found. Please provide a valid book id.", "NOT_FOUND"));
-                    } else {
-                        result[0].genres = result[0].genres.split(',');
-                        let genres = result[0];
-
-                        console.log(genres);
-                        resolve(genres);
-                    }
-                })
-                .catch((err) => {
-                    console.log("inside catch");
-                    errorCode = 500;
-                    reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                })
-            }
-        })
-        .then((genresToDisplay) => {
-            res.status(200).json({
-                data: genresToDisplay
-            });
-        })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
-        })
-    },
-
-    postBookGenre: (req, res) => {
-        new Promise((resolve, reject) => {
-            if(!req.params.bookId) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(404, "Book id parameter is empty.", "INVALID_ARGUMENT"));
-            }
-
-            // Add genre to book
-            else {
-                booksRepo.postBookGenre(req.params.bookId, nanoid(), req.body.data.name)
-                .then((val) => {
-                    let result = val[0][1];
-                    let affectedRows = result.affectedRows;
-                    if(affectedRows == 0) {
-                        errorCode = 400;
-                        reject(responsesController.createErrorMessage(400, "Genre is already associated with the book.", "BAD_REQUEST"));
-                    } else {
-                        resolve();
-                    }
-                })
-                .catch((err) => {
-                    console.log("inside catch");
-                    errorCode = 500;
-                    reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                })
-            }
-        })
-        .then(() => {
-            res.status(200).json({
-                message: `Successfully added genre ${req.body.data.name} to book.`,
-            });
-        })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
-        })
-    },
-
-    deleteBookAndGenre: (req, res) => {
-        new Promise((resolve, reject) => {
-            if(!req.params.bookId) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(404, "Book id parameter is empty.", "INVALID_ARGUMENT"));
-            } else if(!req.params.genreId) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(404, "Genre id parameter is empty.", "INVALID_ARGUMENT"));
-            }
-
-            // Delete book and genre relation
-            else {
-                booksRepo.deleteBookAndGenre(req.params.bookId, req.params.genreId)
-                .then((val) => {
-                    if(val[0].affectedRows == 0) {
-                        errorCode = 404;
-                        reject(responsesController.createErrorMessage(404, "Genre not found, or genre not associated with the book.", "NOT_FOUND"));
-                    } else {
-                        resolve();
-                    }
-                })
-                .catch((err) => {
-                    errorCode = 500;
-                    reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                })
-            }
-        })
-        .then(() => {
-            res.status(200).json({
-                message: `Successfully deleted genre with ${req.params.genreId}.`,
-            });
-        })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
         })
     }
 };

@@ -18,9 +18,9 @@ const controller = {
     postBook: booksController.postBook,
     putBook: booksController.putBook,
     deleteBook: booksController.deleteBook,
-    getBookGenre: booksController.getBookGenre,
-    postBookGenre: booksController.postBookGenre,
-    deleteBookAndGenre: booksController.deleteBookAndGenre,
+    // getBookGenre: booksController.getBookGenre,
+    // postBookGenre: booksController.postBookGenre,
+    // deleteBookAndGenre: booksController.deleteBookAndGenre,
 
     /* GENRES CONTROLLER */
     getGenre: genresController.getGenre,
