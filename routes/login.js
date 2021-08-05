@@ -40,12 +40,15 @@ router.post('/login', (req, res, next) => {
 router.post('/signup', (req, res, next) => {
     usersRepo.addUser(req.body)
     .then((val) => {
-        userIndex++;
-        let user = val[0][0][0];
+        const userObject = val[0][0][0];
+        const tokenObject = issueJWT(userObject);
+        console.log("tokenObject:", tokenObject);
 
         res.status(201).json({
             success: true,
-            user: user
+            user: userObject,
+            token: tokenObject.token,
+            expiresIn: tokenObject.expires
         })
     })
     .catch((err) => {
