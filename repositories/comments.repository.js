@@ -30,39 +30,31 @@ const usersRepo = {
             redis.hmset(`comments:${commentObject.id}`, redisObject);
         })
     },
-    
-    // editComment: (commentId, updatedComment, bookId, reviewId, userId) => {
-    //     return knex.raw("CALL putComment(?, ?, ?, ?, ?)", [commentId, updatedComment.comment, bookId, reviewId, userId])
-    //     .finally(() => knex.destroy);
-    // },
 
     editComment: (commentId, updatedComment) => {
         return knex.raw("CALL putComment_flat(?, ?)", [commentId, updatedComment.comment])
         .then((val) => {
-            redis.hset(`comments:${commentObject.id}`, "comment", updatedComment.comment);
-
-            // console.log("affectedRows:", val[0].affectedRows);
-            // if(val[0].affectedRows === 0) {
-            //     errorCode = 404;
-            //     // res.status(errorCode).json(responsesController.createErrorMessage(errorCode, "Comment not found. Please pass a valid comment id.", "NOT_FOUND"));
-            //     throw "Comment not found. Please pass a valid comment id.";
-            // } else {
-            //     console.log("will update redis");
-            //     console.log("commentId:", commentId);
-            //     console.log("updatedComment:", updatedComment.comment);
-
-            //     const redisObject = {
-            //         comment: updatedComment.comment
-            //     };
-
-            //     redis.hmset(`comments:${commentObject.id}`, redisObject);   
-            // }
+            if(val[0].affectedRows === 0) {
+                throw "Comment not found. Please pass a valid comment id.";
+            } else {
+                redis.hset(`comments:${commentId}`, "comment", updatedComment.comment);
+            }
         })
     },
 
-    deleteComment: (commentId, bookId, reviewId, userId) => {
-        return knex.raw("CALL deleteComment(?, ?, ?, ?)", [commentId, bookId, reviewId, userId])
-        .finally(() => knex.destroy);
+    deleteComment: (commentId) => {
+        return knex.raw("CALL deleteComment_flat(?)", [commentId])
+        .then((val) => {
+            if(val[0].affectedRows === 0) {
+                throw "Comment not found. Please pass a valid comment id.", "NOT_FOUND";
+            } else {
+                redis.del(`comments:${commentId}`);
+            }
+        })
+    },
+
+    deleteCommentsByReview: (reviewId) => {
+        return knex.raw("CALL deleteCommentsByReview_flat(?)", [reviewId]);
     },
 };
 

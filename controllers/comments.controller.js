@@ -143,44 +143,40 @@ const controller = {
     },
 
     deleteComment: (req, res) => {
-        new Promise((resolve, reject) => {
-            if(!req.params.commentId) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(400, "Comment id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
-            }
+        const commentId = req.params.commentId;
+        const bookId = req.params.bookId;
+        const reviewId = req.params.reviewId;
+        const query = req.url.split('?')[1];
+        const urlParams = new URLSearchParams(query);
+        const userId = urlParams.get("userId");
 
-            else {
-                const commentId = req.params.commentId;
-                const bookId = req.params.bookId;
-                const reviewId = req.params.reviewId;
-                const query = req.url.split('?')[1];
-                const urlParams = new URLSearchParams(query);
-                const userId = urlParams.get("userId");
-
-                commentsRepo.deleteComment(commentId, bookId, reviewId, userId)
-                .then((val) => {
-                    // console.log(val[0][1].affectedRows);
-                    if(val[0][1].affectedRows == 0) {
-                        errorCode = 404;
-                        reject(responsesController.createErrorMessage(404, "Comment not found. Please pass a valid comment id.", "NOT_FOUND"));
-                    } else {
-                        resolve();
-                    }
-                })
-                .catch((err) => {
-                    errorCode = 500;
-                    reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                })
-            }
-        })
+        commentsRepo.deleteComment(commentId)
         .then(() => {
             res.status(200).json({
                 message: `Successfully deleted comment.`,
             });
         })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
+        .catch((err) => {
+            errorCode = 500;
+            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
         })
+        
+        // new Promise((resolve, reject) => {
+        //     if(!req.params.commentId) {
+        //         errorCode = 400;
+        //         reject(responsesController.createErrorMessage(400, "Comment id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
+        //     }
+
+        //     else {
+                
+        //     }
+        // })
+        // .then(() => {
+            
+        // })
+        // .catch((errorMessage) => {
+        //     res.status(errorCode).json(errorMessage);
+        // })
     }
 };
 

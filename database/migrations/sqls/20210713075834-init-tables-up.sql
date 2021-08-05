@@ -652,7 +652,42 @@ BEGIN
     WHERE `bookId` = `p_bookId` AND `userId` = `p_userId`;
 END;
 
-CREATE PROCEDURE `updateTotalRating_flat`(
+CREATE PROCEDURE `putReview_flat`(
+	IN `p_id` INT,
+    IN `p_rating` FLOAT(3, 2),
+    IN `p_review` TEXT
+)
+BEGIN
+    UPDATE `reviews_flat`
+    SET `rating` = `p_rating`, `review` = `p_review`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `deleteReview_flat`(
+	IN `p_id` INT
+)
+BEGIN
+    DELETE FROM `reviews_flat`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `changeTotalRating_flat`(
+    IN `p_id` INT,
+    IN `p_newRating` FLOAT(3, 2),
+    IN `p_bookId` INT
+)
+BEGIN
+	DECLARE `v_oldRating` FLOAT(3, 2);
+
+    SELECT `rating` INTO `v_oldRating` FROM `reviews_flat`
+    WHERE `id` = `p_id`;
+
+    UPDATE `books_flat`
+    SET `totalRating` = `totalRating` - `v_oldRating` + `p_newRating`
+    WHERE `id` = `p_bookId`;
+END;
+
+CREATE PROCEDURE `increaseTotalRating_flat`(
     IN `p_rating` FLOAT(3, 2),
     IN `p_bookId` INT
 )
@@ -662,13 +697,39 @@ BEGIN
     WHERE `id` = `p_bookId`;
 END;
 
+CREATE PROCEDURE `decreaseTotalRating_flat`(
+    IN `p_id` INT,
+    IN `p_bookId` INT
+)
+BEGIN
+    DECLARE `v_rating` FLOAT(3, 2);
+
+    SELECT `rating` INTO `v_rating` FROM `reviews_flat`
+    WHERE `id` = `p_id`;
+
+    UPDATE `books_flat`
+    SET `totalRating` = `totalRating` - `v_rating`, `ratingCtr` = `ratingCtr` - 1
+    WHERE `id` = `p_bookId`;
+END;
+
 CREATE PROCEDURE `updateAverageRating_flat`(
     IN `p_bookId` INT
 )
 BEGIN
-    UPDATE `books_flat`
-    SET `averageRating` = `totalRating` / `ratingCtr`
+    DECLARE `v_ratingCtr` INT;
+
+    SELECT `ratingCtr` INTO `v_ratingCtr` FROM `books_flat`
     WHERE `id` = `p_bookId`;
+
+    IF `v_ratingCtr` = 0 THEN
+        UPDATE `books_flat`
+        SET `averageRating` = 0
+        WHERE `id` = `p_bookId`;
+    ELSE
+        UPDATE `books_flat`
+        SET `averageRating` = `totalRating` / `ratingCtr`
+        WHERE `id` = `p_bookId`;
+    END IF;
 END;
 
 -- REVIEWS OLD
@@ -864,13 +925,29 @@ BEGIN
 END;
 
 CREATE PROCEDURE `putComment_flat`(
-    IN `p_id` INT,
+    IN `p_commentId` INT,
     IN `p_comment` TEXT
 )
 BEGIN
     UPDATE `comments_flat`
     SET `comment` = `p_comment`
-    WHERE `id` = `p_id`;
+    WHERE `id` = `p_commentId`;
+END;
+
+CREATE PROCEDURE `deleteComment_flat`(
+    IN `p_commentId` INT
+)
+BEGIN
+    DELETE FROM `comments_flat`
+    WHERE `id` = `p_commentId`;
+END;
+
+CREATE PROCEDURE `deleteCommentsByReview_flat`(
+    IN `p_reviewId` INT
+)
+BEGIN
+    DELETE FROM `comments_flat`
+    WHERE `reviewId` = `p_reviewId`;
 END;
 
 -- COMMENTS OLD
