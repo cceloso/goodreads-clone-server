@@ -70,6 +70,7 @@ const booksRepo = {
                 averageRating: bookObject.averageRating,
                 ratingCtr: bookObject.ratingCtr
             };
+            
             redis.hmset(`books:${bookObject.id}`, redisObject);
         })
     },

@@ -1,7 +1,6 @@
 const responsesController = require('./responses.controller');
 const commentsRepo = require('../repositories/comments.repository');
 const usersRepo = require('../repositories/users.repository');
-let commentIndex = 1;
 
 const controller = {
     getComment: (req, res) => {
@@ -52,22 +51,20 @@ const controller = {
         const urlParams = new URLSearchParams(query);
         const userId = urlParams.get("userId");
         let userName = "";
-        console.log(`bookId: ${bookId}`);
-        console.log(`reviewId: ${reviewId}`);
-        console.log(`userId: ${userId}`);
+        // console.log(`bookId: ${bookId}`);
+        // console.log(`reviewId: ${reviewId}`);
+        // console.log(`userId: ${userId}`);
 
         usersRepo.getUserById(userId)  
         .then((val) => {
             userName = val[0][0][0]['userName'];
-            console.log("userName:", userName);
+            // console.log("userName:", userName);
         })
+        .then(() => commentsRepo.addComment(req.body, bookId, reviewId, userId, userName))
         .then(() => {
-            commentsRepo.addComment(req.body, bookId, reviewId, userId, userName)
-            .then(() => {
-                res.status(201).json({
-                    message: "Successfully added a comment."
-                });
-            })
+            res.status(201).json({
+                message: "Successfully added a comment."
+            });
         })
         .catch((err) => {
             errorCode = 500;
@@ -76,62 +73,73 @@ const controller = {
     },
 
     putComment: (req, res) => {
-        new Promise((resolve, reject) => {
-            const expectedAttributes = 1;
+        const commentId = req.params.commentId;
+        const bookId = req.params.bookId;
+        const reviewId = req.params.reviewId;
+        const query = req.url.split('?')[1];
+        const urlParams = new URLSearchParams(query);
+        const userId = urlParams.get("userId");
+        console.log(`bookId: ${bookId}`);
+        console.log(`reviewId: ${reviewId}`);
+        console.log(`commentId: ${commentId}`);
+        console.log(`userId: ${userId}`);
 
-            if(!req.params.commentId) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(400, "Comment id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
-            }
-
-            else if(!req.body.data) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
-            }
-
-            else {
-                if(Object.keys(req.body.data).length < expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-                } else if(Object.keys(req.body.data).length > expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
-                } else {
-                    const commentId = req.params.commentId;
-                    const bookId = req.params.bookId;
-                    const reviewId = req.params.reviewId;
-                    const query = req.url.split('?')[1];
-                    const urlParams = new URLSearchParams(query);
-                    const userId = urlParams.get("userId");
-                    console.log(`bookId: ${bookId}`);
-                    console.log(`reviewId: ${reviewId}`);
-                    console.log(`commentId: ${commentId}`);
-                    console.log(`userId: ${userId}`);
-
-                    commentsRepo.editComment(commentId, req.body.data, bookId, reviewId, userId)
-                    .then((val) => {
-                        if(val[0][1].affectedRows == 0) {
-                            errorCode = 404;
-                            reject(responsesController.createErrorMessage(404, "Comment not found. Please pass a valid comment id.", "NOT_FOUND"));
-                        } else {
-                            resolve();
-                        }
-                    })
-                    .catch((err) => {
-                        errorCode = 500;
-                        reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                    })
-                }
-            }
-        })
+        commentsRepo.editComment(commentId, req.body)
+        // .then((val) => {
+        //     console.log("val:", val[0].affectedRows);
+        //     // res.status(200).json("test");
+        //     if(val[0].affectedRows === 0) {
+        //         errorCode = 404;
+        //         res.status(errorCode).json(responsesController.createErrorMessage(errorCode, "Comment not found. Please pass a valid comment id.", "NOT_FOUND"));
+        //     } else {
+        //         res.status(200).json({
+        //             message: `Successfully edited comment.`
+        //         });
+        //     }
+        // })
         .then(() => {
             res.status(200).json({
                 message: `Successfully edited comment.`
             });
         })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
+        .catch((err) => {
+            errorCode = 400;
+            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
         })
+
+        // new Promise((resolve, reject) => {
+        //     const expectedAttributes = 1;
+
+        //     if(!req.params.commentId) {
+        //         errorCode = 400;
+        //         reject(responsesController.createErrorMessage(400, "Comment id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
+        //     }
+
+        //     else if(!req.body.data) {
+        //         errorCode = 400;
+        //         reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
+        //     }
+
+        //     else {
+        //         if(Object.keys(req.body.data).length < expectedAttributes) {
+        //             errorCode = 400;
+        //             reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
+        //         } else if(Object.keys(req.body.data).length > expectedAttributes) {
+        //             errorCode = 400;
+        //             reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
+        //         } else {
+                    
+        //         }
+        //     }
+        // })
+        // .then(() => {
+        //     res.status(200).json({
+        //         message: `Successfully edited comment.`
+        //     });
+        // })
+        // .catch((errorMessage) => {
+        //     res.status(errorCode).json(errorMessage);
+        // })
     },
 
     deleteComment: (req, res) => {

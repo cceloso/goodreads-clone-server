@@ -1,7 +1,7 @@
 const knex = require('./knex');
 const redis = require('./redis');
 
-const usersRepo = {
+const reviewsRepo = {
     // getAllReviews: (bookId) => {
     //     return knex.raw("CALL getAllReviews(?)", [bookId])
     //     .finally(() => knex.destroy);
@@ -13,8 +13,9 @@ const usersRepo = {
     },
 
     getReview: (reviewId) => {
-        return knex.raw("CALL getReview(?)", [reviewId])
-        .finally(() => knex.destroy);
+        // return knex.raw("CALL getReview(?)", [reviewId])
+        // .finally(() => knex.destroy);
+        return redis.hgetall(`reviews:${reviewId}`);
     },
 
     // addReview: (reviewId, newReview, bookId, userId) => {
@@ -24,7 +25,22 @@ const usersRepo = {
 
     addReview: (newReview, bookId, userId, userName) => {
         return knex.raw("CALL postReview_flat(?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, userId, userName])
-        .finally(() => knex.destroy);
+        .then((val) => {
+            const reviewObject = val[0][0][0];
+            // console.log("reviewObject:", reviewObject);
+
+            const redisObject = {
+                id: reviewObject.id,
+                rating: reviewObject.rating,
+                review: reviewObject.review,
+                dateCreated: reviewObject.dateCreated,
+                bookId: reviewObject.bookId,
+                userId: reviewObject.userId,
+                userName: reviewObject.userName
+            };
+
+            redis.hmset(`reviews:${reviewObject.id}`, redisObject);
+        })
     },
 
     updateTotalRating: (rating, bookId) => {
@@ -48,4 +64,4 @@ const usersRepo = {
     },
 };
 
-module.exports = usersRepo;
+module.exports = reviewsRepo;

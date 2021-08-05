@@ -1,7 +1,6 @@
 const responsesController = require('./responses.controller');
 const reviewsRepo = require('../repositories/reviews.repository');
 const usersRepo = require('../repositories/users.repository');
-let reviewIndex = 1;
 
 const controller = {
     getReview: (req, res) => {
@@ -19,12 +18,13 @@ const controller = {
         } else {
             console.log("from getReview: ");
             reviewsRepo.getReview(req.params.reviewId)
-            .then((val) => {
-                let review = val[0][0];
-                if(review.length == 0) {
+            .then((review) => {
+                if(Object.keys(review).length === 0) {
+                    console.log("review not found");
                     errorCode = 404;
                     res.status(errorCode).json(responsesController.createErrorMessage(404, "Review not found. Please provide a valid review id.", "NOT_FOUND"));
                 } else {
+                    console.log("review found");
                     res.status(200).json(review);
                 }
             })
@@ -41,8 +41,8 @@ const controller = {
         const urlParams = new URLSearchParams(query);
         const userId = urlParams.get("userId");
         let userName = "";
-        console.log(`bookId: ${bookId}`);
-        console.log(`userId: ${userId}`);
+        console.log(`bookId: ${bookId}, typeof: ${typeof bookId}`);
+        console.log(`userId: ${userId}, typeof: ${typeof userId}`);
 
         usersRepo.getUserById(userId)  
         .then((val) => {
@@ -57,14 +57,6 @@ const controller = {
                 message: "Successfully added a review."
             });
         })
-        // .then(() => {
-        //     reviewsRepo.addReview(req.body, bookId, userId, userName)
-        //     .then(() => {
-        //         res.status(201).json({
-        //             message: "Successfully added a review."
-        //         });
-        //     })
-        // })
         .catch((err) => {
             res.status(400).json(responsesController.createErrorMessage(400, err, "error in posting review"));
         })

@@ -163,7 +163,7 @@ CREATE TABLE `books_flat` (
     `description` TEXT NOT NULL,
     `genres` JSON NOT NULL,
     `imageUrl` VARCHAR(255) NOT NULL,
-    `totalRating` FLOAT(3, 2) NOT NULL,
+    `totalRating` FLOAT(10, 2) NOT NULL,
     `averageRating` FLOAT(3, 2) NOT NULL,
     `ratingCtr` INT NOT NULL,
     CONSTRAINT `titleAndAuthor` UNIQUE(`title`, `author`)
@@ -633,7 +633,8 @@ CREATE TABLE `reviews_flat` (
     `dateCreated` DATE NOT NULL,
     `bookId` INT NOT NULL,
     `userId` INT NOT NULL,
-    `userName` VARCHAR(255) NOT NULL
+    `userName` VARCHAR(255) NOT NULL,
+    CONSTRAINT `bookAndUser` UNIQUE(`bookId`, `userId`)
 );
 
 CREATE PROCEDURE `postReview_flat`(
@@ -644,9 +645,11 @@ CREATE PROCEDURE `postReview_flat`(
     IN `p_userName` VARCHAR(255)
 )
 BEGIN
--- 	Insert review
 	INSERT INTO `reviews_flat` (`rating`, `review`, `dateCreated`, `bookId`, `userId`, `userName`)
     VALUES (`p_rating`, `p_review`, CURDATE(), `p_bookId`, `p_userId`, `p_userName`);
+
+    SELECT * FROM `reviews_flat`
+    WHERE `bookId` = `p_bookId` AND `userId` = `p_userId`;
 END;
 
 CREATE PROCEDURE `updateTotalRating_flat`(
@@ -852,9 +855,22 @@ CREATE PROCEDURE `postComment_flat`(
     IN `p_userName` VARCHAR(255)
 )
 BEGIN
-    -- 	Insert review
     INSERT INTO `comments_flat` (`comment`, `dateCreated`, `bookId`, `reviewId`, `userId`, `userName`)
     VALUES (`p_comment`, NOW(), `p_bookId`, `p_reviewId`, `p_userId`, `p_userName`);
+
+    SELECT * FROM `comments_flat` WHERE `id` = (
+        SELECT MAX(`id`) FROM `comments_flat`
+    );
+END;
+
+CREATE PROCEDURE `putComment_flat`(
+    IN `p_id` INT,
+    IN `p_comment` TEXT
+)
+BEGIN
+    UPDATE `comments_flat`
+    SET `comment` = `p_comment`
+    WHERE `id` = `p_id`;
 END;
 
 -- COMMENTS OLD
