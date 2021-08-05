@@ -14,6 +14,7 @@ const controller = {
 
     /* BOOKS CONTROLLER */
     getBook: booksController.getBook,
+    getBooks: booksController.getBooks,
     postBook: booksController.postBook,
     putBook: booksController.putBook,
     deleteBook: booksController.deleteBook,

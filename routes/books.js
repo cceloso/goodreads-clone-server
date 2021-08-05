@@ -17,7 +17,7 @@ router.put('/', controller.putBook);
 router.put('/:bookId', controller.putBook);
 
 /* View all books */
-router.get('/', controller.getBook);
+router.get('/', controller.getBooks);
 
 /* View specific book */
 router.get('/:bookId', controller.getBook);
@@ -29,7 +29,7 @@ router.delete('/', controller.deleteBook);
 router.delete('/:bookId', controller.deleteBook);
 
 /* View books by genre */
-router.get('/?genre=:genreId', controller.getBook);
+router.get('/?genre=:genreId', controller.getBooks);
 
 
 /* -- GENRES -- */

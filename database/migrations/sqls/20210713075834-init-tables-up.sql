@@ -178,7 +178,7 @@ BEGIN
     WHERE `JSON_CONTAINS`(`genres`, `p_genre`);
 END;
 
-CREATE PROCEDURE `getAllBooks_flat`()
+CREATE PROCEDURE `getBooks_flat`()
 BEGIN
 	SELECT *  FROM `books_flat`;
 END;

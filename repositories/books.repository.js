@@ -2,9 +2,8 @@ const knex = require('./knex');
 const redis = require('./redis');
 
 const booksRepo = {
-    getAllBooks: () => {
-        return knex.raw("CALL getAllBooks_flat()")
-        .finally(() => knex.destroy);
+    getBooks: () => {
+        return knex.raw("CALL getBooks_flat()");
     },
 
     getBook: (bookId) => {
@@ -12,11 +11,6 @@ const booksRepo = {
         // .finally(() => knex.destroy);
         return redis.hgetall(`books:${bookId}`);
     },
-
-    // getBooksByGenre: (genreId) => {
-    //     return knex.raw("CALL getBooksByGenre(?)", [genreId])
-    //     .finally(() => knex.destroy);
-    // },
 
     getBooksByGenre: (genreId) => {
         return knex.raw("CALL getBooksByGenre_flat(?)", [JSON.stringify(genreId)])

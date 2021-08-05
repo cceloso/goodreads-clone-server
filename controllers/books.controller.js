@@ -2,99 +2,51 @@ const responsesController = require('./responses.controller');
 const booksRepo = require('../repositories/books.repository');
 const reviewsRepo = require('../repositories/reviews.repository');
 const commentsRepo = require('../repositories/comments.repository');
-const genresRepo = require('../repositories/genres.repository');
+
 const { nanoid } = require('nanoid');
+const url = require('url');
 
 const controller = {
     getBook: (req, res) => {
-        new Promise((resolve, reject) => {
-            if(!req.params.bookId) {
-                const splittedUrl = req.url.split('?');
+        booksRepo.getBook(req.params.bookId)
+        .then((val) => {
+            if(Object.keys(val).length === 0) {
+                errorCode = 404;
+                throw "Book not found. Please provide a valid book id.";
+            } else {
+                // console.log("hgetall return value:", val);
+                res.status(200).json(val);
+            }
+        })
+        .catch((err) => {
+            errorCode = 500;
+            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
+        })
+    },
 
-                if(splittedUrl.length == 1) {
-                    booksRepo.getAllBooks()
-                    .then((val) => {
-                        let books = val[0][0];
-                        resolve(books);
-                    })
-                    .catch((err) => {
-                        errorCode = 500;
-                        reject(responsesController.createErrorMessage(500, err, "ERROR"));
-                    })
+    getBooks: (req, res) => {
+        const queryObject = url.parse(req.url, true).query;
+        const genre = queryObject.genre;
+
+        if(genre == "all") {
+            booksRepo.getBooks()
+            .then((val) => {
+                let books = val[0][0];
+                res.status(200).json(books);
+            })
+        } else {
+            booksRepo.getBooksByGenre(genre)
+            .then((val) => {
+                let books = val[0][0];
+                if(books.length != 0) {
+                    console.log("specific, testing");
+                    res.status(200).json(books);
                 } else {
-                    const splittedParams = splittedUrl[1].split('=');
-                    const genreName = splittedParams[1];
-
-                    console.log("genreName");
-                    console.log(genreName);
-
-                    if(genreName == "all") {
-                        genresRepo.getAllGenres()
-                        .then((val) => {
-                            let genres = val[0][0];
-                            resolve(genres);
-                        })
-                        .catch((err) => {
-                            errorCode = 500;
-                            reject(responsesController.createErrorMessage(500, "Server-side error.", "ERROR"));
-                        })
-                    } else {
-                        booksRepo.getBooksByGenre(genreName)
-                        .then((val) => {
-                            let books = val[0][0];
-                            if(books.length != 0) {
-                                // console.log(books);
-                                resolve(books);
-                            } else {
-                                // console.log("No books with that genre");
-                                errorCode = 404;
-                                reject(responsesController.createErrorMessage(404, "Genre not found or no books associated with that genre.", "NOT_FOUND"));
-                            }
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            errorCode = 500;
-                            reject(responsesController.createErrorMessage(500, "Server-side error.", "UNKNOWN"));
-                        })
-                    }
+                    errorCode = 404;
+                    res.status(errorCode).json(responsesController.createErrorMessage(errorCode, "Genre not found or no books associated with that genre.", "NOT_FOUND"));
                 }
-            }
-
-            else {
-                booksRepo.getBook(req.params.bookId)
-                .then((val) => {
-                    console.log("inside getBook in books controller");
-                    if(Object.keys(val).length === 0) {
-                        console.log("book not found");
-                        errorCode = 404;
-                        reject(responsesController.createErrorMessage(404, "Book not found. Please provide a valid book id.", "NOT_FOUND"));
-                    } else {
-                        // console.log("hgetall return value:", val);
-                        resolve(val);
-                    }
-                    // resolve("hello");
-
-                    // let book = val[0][0];
-                    // if(book.length == 0) {
-                    //     errorCode = 404;
-                    //     reject(responsesController.createErrorMessage(404, "Book not found. Please provide a valid book id.", "NOT_FOUND"));
-                    // } else {
-                    //     resolve(book);
-                    // }
-                })
-                .catch((err) => {
-                    // console.log("inside catch");
-                    errorCode = 500;
-                    reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                })
-            }
-        })
-        .then((booksToDisplay) => {
-            res.status(200).json(booksToDisplay);
-        })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
-        })
+            })
+        }
     },
 
     postBook: (req, res) => {
