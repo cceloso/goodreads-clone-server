@@ -1,4 +1,5 @@
 const knex = require('./knex');
+const redis = require('./redis');
 
 const usersRepo = {
     // getAllReviews: (bookId) => {

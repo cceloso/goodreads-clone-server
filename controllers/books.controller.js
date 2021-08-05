@@ -63,13 +63,24 @@ const controller = {
             else {
                 booksRepo.getBook(req.params.bookId)
                 .then((val) => {
-                    let book = val[0][0];
-                    if(book.length == 0) {
+                    console.log("inside getBook in books controller");
+                    if(Object.keys(val).length === 0) {
+                        console.log("book not found");
                         errorCode = 404;
                         reject(responsesController.createErrorMessage(404, "Book not found. Please provide a valid book id.", "NOT_FOUND"));
                     } else {
-                        resolve(book);
+                        // console.log("hgetall return value:", val);
+                        resolve(val);
                     }
+                    // resolve("hello");
+
+                    // let book = val[0][0];
+                    // if(book.length == 0) {
+                    //     errorCode = 404;
+                    //     reject(responsesController.createErrorMessage(404, "Book not found. Please provide a valid book id.", "NOT_FOUND"));
+                    // } else {
+                    //     resolve(book);
+                    // }
                 })
                 .catch((err) => {
                     // console.log("inside catch");
@@ -86,158 +97,70 @@ const controller = {
         })
     },
 
-    // postBook: (req, res) => {
-    //     new Promise((resolve, reject) => {
-    //         // let bookId = nanoid();
-    //         let bookId = bookIndex;
-    //         let genreId = "";
-    //         let genreName = "";
-    //         let genres = [];
-    //         // let genreId = nanoid();
-    //         const expectedAttributes = 8;
-
-    //         if(req.params.bookId) {
-    //             errorCode = 400;
-    //             reject(responsesController.createErrorMessage(400, "Book id parameter is set. If you intend to edit the book with this id, please send a PUT request; else, please remove id parameter.", "INVALID_ARGUMENT"));
-    //         }
-
-    //         else if(!req.body) {
-    //             errorCode = 400;
-    //             reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
-    //         }
-
-    //         else {
-    //             if(Object.keys(req.body).length < expectedAttributes) {
-    //                 errorCode = 400;
-    //                 reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-    //             } else if(Object.keys(req.body).length > expectedAttributes) {
-    //                 errorCode = 400;
-    //                 reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
-    //             } else if(req.body.genres.length == 0) {
-    //                 errorCode = 400;
-    //                 reject(responsesController.createErrorMessage(400, "Genres attribute is empty.", "INVALID_ARGUMENT"));
-    //             } else {
-    //                 const authorId = nanoid();
-    //                 booksRepo.addBook(bookId, authorId, req.body)
-    //                 .then(() => {
-    //                     bookIndex++;
-    //                     resolve();
-    //                 })
-    //                 .then(() => {
-    //                     genres = req.body.genres;
-
-    //                     // Check if each genre exists; if not, add it
-    //                     for(let i = 0; i < genres.length; i++) {
-    //                         genreId = nanoid();
-    //                         genreName = genres[i];
-    //                         booksRepo.postBookGenre(bookId, genreId, genreName)
-    //                         .then((val) => {
-    //                             let result = val[0][1];
-    //                             let affectedRows = result.affectedRows;
-    //                             if(affectedRows == 0) {
-    //                                 errorCode = 400;
-    //                                 reject(responsesController.createErrorMessage(400, "Genre is already associated with the book.", "BAD_REQUEST"));
-    //                             } else {
-    //                                 resolve();
-    //                             }
-    //                         })
-    //                         .catch((err) => {
-    //                             console.log("inside catch");
-    //                             errorCode = 500;
-    //                             reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-    //                         })
-    //                     }
-    //                     resolve();
-    //                 })
-    //                 .catch((err) => {
-    //                     if(err.code == 'ER_DUP_ENTRY') {
-    //                         let dupEntryMessage = err.sqlMessage.split(' ');
-    //                         let dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
-    //                         errorCode = 409;
-
-    //                         if(dupEntryKey == `'titleAndAuthor'`) {
-    //                             reject(responsesController.createErrorMessage(409, "Book with that title and author already exists.", "ALREADY_EXISTS"));
-    //                         } else if(dupEntryKey == `'PRIMARY'`) {
-    //                             reject(responsesController.createErrorMessage(409, "Book with that id already exists.", "ALREADY_EXISTS"));
-    //                         }
-    //                     }
-
-    //                     else {
-    //                         errorCode = 500;
-    //                         reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-    //                     }
-    //                 })
-    //             }
-    //         }
-    //     })
-    //     .then(() => {
-    //         res.status(201).json({
-    //             message: "Successfully added a book."
-    //         });
-    //     })
-    //     .catch((errorMessage) => {
-    //         res.status(errorCode).json(errorMessage);
-    //     })
-    // },
-
     postBook: (req, res) => {
-        new Promise((resolve, reject) => {
-            const expectedAttributes = 8;
-
-            if(req.params.bookId) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(400, "Book id parameter is set. If you intend to edit the book with this id, please send a PUT request; else, please remove id parameter.", "INVALID_ARGUMENT"));
-            }
-
-            else if(!req.body) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
-            }
-
-            else {
-                if(Object.keys(req.body).length < expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-                } else if(Object.keys(req.body).length > expectedAttributes) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
-                } else if(req.body.genres.length == 0) {
-                    errorCode = 400;
-                    reject(responsesController.createErrorMessage(400, "Genres attribute is empty.", "INVALID_ARGUMENT"));
-                } else {
-                    booksRepo.addBook(req.body)
-                    .then(() => {
-                        resolve();
-                    })
-                    .catch((err) => {
-                        if(err.code == 'ER_DUP_ENTRY') {
-                            let dupEntryMessage = err.sqlMessage.split(' ');
-                            let dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
-                            errorCode = 409;
-
-                            if(dupEntryKey == `'titleAndAuthor'`) {
-                                reject(responsesController.createErrorMessage(409, "Book with that title and author already exists.", "ALREADY_EXISTS"));
-                            } else if(dupEntryKey == `'PRIMARY'`) {
-                                reject(responsesController.createErrorMessage(409, "Book with that id already exists.", "ALREADY_EXISTS"));
-                            }
-                        }
-
-                        else {
-                            errorCode = 500;
-                            reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                        }
-                    })
-                }
-            }
-        })
+        booksRepo.addBook(req.body)
         .then(() => {
+            console.log("yay done w/ mysql and redis");
             res.status(201).json({
                 message: "Successfully added a book."
             });
         })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
+        .catch((err) => {
+            if(err.code == 'ER_DUP_ENTRY') {
+                let dupEntryMessage = err.sqlMessage.split(' ');
+                let dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
+                errorCode = 409;
+
+                if(dupEntryKey == `'titleAndAuthor'`) {
+                    res.status(errorCode).json(responsesController.createErrorMessage(409, "Book with that title and author already exists.", "ALREADY_EXISTS"));
+                } else if(dupEntryKey == `'PRIMARY'`) {
+                    res.status(errorCode).json(responsesController.createErrorMessage(409, "Book with that id already exists.", "ALREADY_EXISTS"));
+                }
+            }
+
+            else {
+                console.log("postBook else in catch error:", err);
+                errorCode = 500;
+                res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+            }
         })
+
+        // new Promise((resolve, reject) => {
+        //     const expectedAttributes = 8;
+
+        //     if(req.params.bookId) {
+        //         errorCode = 400;
+        //         reject(responsesController.createErrorMessage(400, "Book id parameter is set. If you intend to edit the book with this id, please send a PUT request; else, please remove id parameter.", "INVALID_ARGUMENT"));
+        //     }
+
+        //     else if(!req.body) {
+        //         errorCode = 400;
+        //         reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
+        //     }
+
+        //     else {
+        //         if(Object.keys(req.body).length < expectedAttributes) {
+        //             errorCode = 400;
+        //             reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
+        //         } else if(Object.keys(req.body).length > expectedAttributes) {
+        //             errorCode = 400;
+        //             reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
+        //         } else if(req.body.genres.length == 0) {
+        //             errorCode = 400;
+        //             reject(responsesController.createErrorMessage(400, "Genres attribute is empty.", "INVALID_ARGUMENT"));
+        //         } else {
+                    
+        //         }
+        //     }
+        // })
+        // .then(() => {
+        //     res.status(201).json({
+        //         message: "Successfully added a book."
+        //     });
+        // })
+        // .catch((errorMessage) => {
+        //     res.status(errorCode).json(errorMessage);
+        // })
     },
 
     putBook: (req, res) => {

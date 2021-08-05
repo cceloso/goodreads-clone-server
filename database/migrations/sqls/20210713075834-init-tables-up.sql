@@ -182,6 +182,9 @@ CREATE PROCEDURE `postBook_flat`(
 BEGIN
 	INSERT INTO `books_flat` (`title`, `author`, `isbn`, `publisher`, `published`, `description`, `genres`, `imageUrl`, `totalRating`, `averageRating`, `ratingCtr`)
     VALUES (`p_title`, `p_author`, `p_isbn`, `p_publisher`, `p_published`, `p_description`, `p_genres`, `p_imageUrl`, 0, 0, 0);
+
+    SELECT * FROM `books_flat`
+    WHERE `title` = `p_title` AND `author` = `p_author`;
 END;
 
 CREATE PROCEDURE `getBooksByGenre_flat`(
@@ -191,6 +194,19 @@ BEGIN
 	SELECT *
     FROM `books_flat`
     WHERE `JSON_CONTAINS`(`genres`, `p_genre`);
+END;
+
+CREATE PROCEDURE `getAllBooks_flat`()
+BEGIN
+	SELECT *  FROM `books_flat`;
+END;
+
+CREATE PROCEDURE `getBook_flat`(
+	IN `p_id` INT
+)
+BEGIN
+	SELECT *  FROM `books_flat`
+    WHERE `id` = `p_id`;
 END;
 
 -- BOOKS OLD

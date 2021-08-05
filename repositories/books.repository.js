@@ -1,14 +1,16 @@
 const knex = require('./knex');
+const redis = require('./redis');
 
 const booksRepo = {
     getAllBooks: () => {
-        return knex.raw("CALL getAllBooks()")
+        return knex.raw("CALL getAllBooks_flat()")
         .finally(() => knex.destroy);
     },
 
     getBook: (bookId) => {
-        return knex.raw("CALL getBook(?)", [bookId])
-        .finally(() => knex.destroy);
+        // return knex.raw("CALL getBook_flat(?)", [bookId])
+        // .finally(() => knex.destroy);
+        return redis.hgetall(`books:${bookId}`);
     },
 
     // getBooksByGenre: (genreId) => {
@@ -48,7 +50,28 @@ const booksRepo = {
 
     addBook: (newBook) => {
         return knex.raw("CALL postBook_flat(?, ?, ?, ?, ?, ?, ?, ?)", [newBook.title, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, JSON.stringify(newBook.genres), newBook.imageUrl])
-        .finally(() => knex.destroy);
+        .then((val) => {
+            const bookObject = val[0][0][0];
+            let genresStr = JSON.parse(bookObject.genres).join(',');
+            // console.log("type of genres:", typeof genres);
+            // console.log("genres:", genres);
+
+            const redisObject = {
+                id: bookObject.id,
+                title: bookObject.title,
+                author: bookObject.author,
+                isbn: bookObject.isbn,
+                publisher: bookObject.publisher,
+                published: bookObject.published,
+                description: bookObject.description,
+                genres: genresStr,
+                imageUrl: bookObject.imageUrl,
+                totalRating: bookObject.totalRating,
+                averageRating: bookObject.averageRating,
+                ratingCtr: bookObject.ratingCtr
+            };
+            redis.hmset(`books:${bookObject.id}`, redisObject);
+        })
     },
 
     editBook: (bookId, authorId, updatedBook) => {
