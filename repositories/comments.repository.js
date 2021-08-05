@@ -53,6 +53,10 @@ const usersRepo = {
         })
     },
 
+    deleteCommentsByBook: (bookId) => {
+        return knex.raw("CALL deleteCommentsByBook_flat(?)", [bookId]);
+    },
+
     deleteCommentsByReview: (reviewId) => {
         return knex.raw("CALL deleteCommentsByReview_flat(?)", [reviewId]);
     },

@@ -169,24 +169,6 @@ CREATE TABLE `books_flat` (
     CONSTRAINT `titleAndAuthor` UNIQUE(`title`, `author`)
 );
 
-CREATE PROCEDURE `postBook_flat`(
-	IN `p_title` VARCHAR(255),
-    IN `p_author` VARCHAR(255),
-    IN `p_isbn` VARCHAR(255),
-    IN `p_publisher` VARCHAR(255),
-    IN `p_published` YEAR,
-    IN `p_description` TEXT,
-    IN `p_genres` JSON,
-    IN `p_imageUrl` VARCHAR(255)
-)
-BEGIN
-	INSERT INTO `books_flat` (`title`, `author`, `isbn`, `publisher`, `published`, `description`, `genres`, `imageUrl`, `totalRating`, `averageRating`, `ratingCtr`)
-    VALUES (`p_title`, `p_author`, `p_isbn`, `p_publisher`, `p_published`, `p_description`, `p_genres`, `p_imageUrl`, 0, 0, 0);
-
-    SELECT * FROM `books_flat`
-    WHERE `title` = `p_title` AND `author` = `p_author`;
-END;
-
 CREATE PROCEDURE `getBooksByGenre_flat`(
 	IN `p_genre` VARCHAR(255)
 )
@@ -208,6 +190,53 @@ BEGIN
 	SELECT *  FROM `books_flat`
     WHERE `id` = `p_id`;
 END;
+
+CREATE PROCEDURE `postBook_flat`(
+	IN `p_title` VARCHAR(255),
+    IN `p_author` VARCHAR(255),
+    IN `p_isbn` VARCHAR(255),
+    IN `p_publisher` VARCHAR(255),
+    IN `p_published` YEAR,
+    IN `p_description` TEXT,
+    IN `p_genres` JSON,
+    IN `p_imageUrl` VARCHAR(255)
+)
+BEGIN
+	INSERT INTO `books_flat` (`title`, `author`, `isbn`, `publisher`, `published`, `description`, `genres`, `imageUrl`, `totalRating`, `averageRating`, `ratingCtr`)
+    VALUES (`p_title`, `p_author`, `p_isbn`, `p_publisher`, `p_published`, `p_description`, `p_genres`, `p_imageUrl`, 0, 0, 0);
+
+    SELECT * FROM `books_flat`
+    WHERE `title` = `p_title` AND `author` = `p_author`;
+END;
+
+CREATE PROCEDURE `putBook_flat`(
+    IN `p_id` INT,
+    IN `p_title` VARCHAR(255),
+    IN `p_author` VARCHAR(255),
+    IN `p_isbn` VARCHAR(255),
+    IN `p_publisher` VARCHAR(255),
+    IN `p_published` YEAR,
+    IN `p_description` TEXT,
+    IN `p_genres` JSON,
+    IN `p_imageUrl` VARCHAR(255)
+)
+BEGIN
+	UPDATE `books_flat`
+    SET `title` = `p_title`, `author` = `p_author`, `isbn` = `p_isbn`, `publisher` = `p_publisher`, `published` = `p_published`, `description` = `p_description`, `genres` = `p_genres`, `imageUrl` = `p_imageUrl`
+    WHERE `id` = `p_id`;
+
+    SELECT * FROM `books_flat`
+    WHERE `title` = `p_title` AND `author` = `p_author`;
+END;
+
+CREATE PROCEDURE `deleteBook_flat`(
+	IN `p_id` INT
+)
+BEGIN
+	DELETE FROM `books_flat`
+    WHERE `id` = `p_id`;
+END;
+
 
 -- BOOKS OLD
 
@@ -671,6 +700,14 @@ BEGIN
     WHERE `id` = `p_id`;
 END;
 
+CREATE PROCEDURE `deleteReviewsByBook_flat`(
+    IN `p_bookId` INT
+)
+BEGIN
+    DELETE FROM `reviews_flat`
+    WHERE `bookId` = `p_bookId`;
+END;
+
 CREATE PROCEDURE `changeTotalRating_flat`(
     IN `p_id` INT,
     IN `p_newRating` FLOAT(3, 2),
@@ -940,6 +977,14 @@ CREATE PROCEDURE `deleteComment_flat`(
 BEGIN
     DELETE FROM `comments_flat`
     WHERE `id` = `p_commentId`;
+END;
+
+CREATE PROCEDURE `deleteCommentsByBook_flat`(
+    IN `p_bookId` INT
+)
+BEGIN
+    DELETE FROM `comments_flat`
+    WHERE `bookId` = `p_bookId`;
 END;
 
 CREATE PROCEDURE `deleteCommentsByReview_flat`(
