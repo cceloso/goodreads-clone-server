@@ -2,26 +2,14 @@ const knex = require('./knex');
 const redis = require('./redis');
 
 const reviewsRepo = {
-    // getAllReviews: (bookId) => {
-    //     return knex.raw("CALL getAllReviews(?)", [bookId])
-    //     .finally(() => knex.destroy);
-    // },
-
     getReviews: (bookId) => {
-        return knex.raw("CALL getReviews(?)", [bookId])
+        return knex.raw("CALL getReviews_flat(?)", [bookId])
         .finally(() => knex.destroy);
     },
 
     getReview: (reviewId) => {
-        // return knex.raw("CALL getReview(?)", [reviewId])
-        // .finally(() => knex.destroy);
         return redis.hgetall(`reviews:${reviewId}`);
     },
-
-    // addReview: (reviewId, newReview, bookId, userId) => {
-    //     return knex.raw("CALL postReview(?, ?, ?, ?, ?)", [reviewId, newReview.rating, newReview.review, bookId, userId])
-    //     .finally(() => knex.destroy);
-    // },
 
     addReview: (newReview, bookId, userId, userName) => {
         return knex.raw("CALL postReview_flat(?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, userId, userName])
@@ -44,11 +32,24 @@ const reviewsRepo = {
     },
 
     editReview: (reviewId, updatedReview) => {
-        return knex.raw("CALL putReview_flat(?, ?, ?)", [reviewId, updatedReview.rating, updatedReview.review]);
+        return knex.raw("CALL putReview_flat(?, ?, ?)", [reviewId, updatedReview.rating, updatedReview.review])
+        .then((val) => {
+            if(val[0].affectedRows === 0) {
+                throw "Review not found. Please pass a valid review id.";
+            } else {
+                const redisObject = {
+                    rating: updatedReview.rating,
+                    review: updatedReview.review
+                };
+
+                redis.hmset(`reviews:${reviewId}`, redisObject);
+            }
+        });
     },
 
     deleteReview: (reviewId) => {
-        return knex.raw("CALL deleteReview_flat(?)", [reviewId]);
+        return knex.raw("CALL deleteReview_flat(?)", [reviewId])
+        .then(() => redis.del(`reviews:${reviewId}`));
     },
 
     deleteReviewsByBook: (bookId) => {

@@ -2,6 +2,7 @@ const responsesController = require('./responses.controller');
 const reviewsRepo = require('../repositories/reviews.repository');
 const commentsRepo = require('../repositories/comments.repository');
 const usersRepo = require('../repositories/users.repository');
+const url = require('url');
 
 const controller = {
     getReview: (req, res) => {
@@ -38,18 +39,12 @@ const controller = {
 
     postReview: (req, res) => {
         const bookId = req.params.bookId;
-        const query = req.url.split('?')[1];
-        const urlParams = new URLSearchParams(query);
-        const userId = urlParams.get("userId");
+        const queryObject = url.parse(req.url, true).query;
+        const userId = queryObject.userId;
         let userName = "";
-        console.log(`bookId: ${bookId}, typeof: ${typeof bookId}`);
-        console.log(`userId: ${userId}, typeof: ${typeof userId}`);
 
-        usersRepo.getUserById(userId)  
-        .then((val) => {
-            userName = val[0][0][0]['userName'];
-            console.log("userName:", userName);
-        })
+        usersRepo.getUserById(userId)
+        .then((val) => userName = val[0][0][0]['userName'])
         .then(() => reviewsRepo.addReview(req.body, bookId, userId, userName))
         .then(() => reviewsRepo.increaseTotalRating(req.body.rating, bookId))
         .then(() => reviewsRepo.updateAverageRating(bookId))

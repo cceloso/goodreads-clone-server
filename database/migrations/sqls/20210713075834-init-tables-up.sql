@@ -787,7 +787,7 @@ CREATE TABLE `reviews` (
     CONSTRAINT `bookAndUser` UNIQUE(`bookId`, `userId`)
 );
 
-CREATE PROCEDURE `getReviews`(
+CREATE PROCEDURE `getReviews_flat`(
 	IN `p_bookId` INT
 )
 BEGIN
