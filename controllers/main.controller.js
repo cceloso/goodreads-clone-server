@@ -10,7 +10,7 @@ const controller = {
     postUser: usersController.postUser,
     putUser: usersController.putUser,
     deleteUser: usersController.deleteUser,
-    getReviewsByUser: usersController.getReviewsByUser,
+    getReviewsByUser: reviewsController.getReviewsByUser,
 
     /* BOOKS CONTROLLER */
     getBook: booksController.getBook,
@@ -30,12 +30,14 @@ const controller = {
 
     /* REVIEWS CONTROLLER */
     getReview: reviewsController.getReview,
+    getReviews: reviewsController.getReviews,
     postReview: reviewsController.postReview,
     putReview: reviewsController.putReview,
     deleteReview: reviewsController.deleteReview,
 
     /* COMMENTS CONTROLLER */
     getComment: commentsController.getComment,
+    getComments: commentsController.getComments,
     postComment: commentsController.postComment,
     putComment: commentsController.putComment,
     deleteComment: commentsController.deleteComment,

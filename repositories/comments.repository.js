@@ -2,13 +2,13 @@ const knex = require('./knex');
 const redis = require('./redis');
 
 const usersRepo = {
-    getAllComments: (reviewId) => {
-        return knex.raw("CALL getAllComments(?)", [reviewId])
+    getComment: (commentId) => {
+        return knex.raw("CALL getComment_flat(?)", [commentId])
         .finally(() => knex.destroy);
     },
-
-    getComment: (commentId) => {
-        return knex.raw("CALL getComment(?)", [commentId])
+    
+    getComments: (reviewId) => {
+        return knex.raw("CALL getComments_flat(?)", [reviewId])
         .finally(() => knex.destroy);
     },
 

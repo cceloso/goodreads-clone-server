@@ -2,13 +2,16 @@ const knex = require('./knex');
 const redis = require('./redis');
 
 const reviewsRepo = {
-    getReviews: (bookId) => {
-        return knex.raw("CALL getReviews_flat(?)", [bookId])
-        .finally(() => knex.destroy);
-    },
-
     getReview: (reviewId) => {
         return redis.hgetall(`reviews:${reviewId}`);
+    },
+
+    getReviews: (bookId) => {
+        return knex.raw("CALL getReviews_flat(?)", [bookId]);
+    },
+
+    getReviewsByUser: (userId) => {
+        return knex.raw("CALL getReviewsByUser_flat(?)", [userId]);
     },
 
     addReview: (newReview, bookId, userId, userName) => {
@@ -28,7 +31,7 @@ const reviewsRepo = {
             };
 
             redis.hmset(`reviews:${reviewObject.id}`, redisObject);
-        })
+        });
     },
 
     editReview: (reviewId, updatedReview) => {

@@ -20,102 +20,38 @@ const usersRepo = {
         .finally(() => knex.destroy);
     },
 
-    // loginUser: (user) => {
-    //     return knex.raw("CALL loginUser(?, ?)", [user.usernameOrEmail, user.password])
-    //     .finally(() => knex.destroy);
-    // },
-
     loginUser: (user) => {
-        let correctPassword = "";
-
-        knex.raw("CALL getUserByUsernameOrEmail(?)", [user.usernameOrEmail])
-        .then((val) => {
-            // console.log("val:", val[0][0]);
-            if(val[0][0].length != 0) {
-                correctPassword = val[0][0][0]['password'];
-            } else {
-                throw("User does not exist.");
-            }
-            console.log(correctPassword);
-        })
-        .then(async () => {
-            if (await bcrypt.compare(user.password, correctPassword)) {
-                console.log("password is correct");
-                return true;
-            } else {
-                console.log("password is incorrect");
-                return false;
-            }
-        })
-        .catch((err) => {
-            console.log("inside catch in loginUser repo");
-            console.log("err:", err);
-            return false;
-        })
-        .finally(() => knex.destroy);
-    },
-    
-    loginUser2: (user) => {
         let correctPassword = "";
         let userObject;
 
         return new Promise((resolve, reject) => {
             knex.raw("CALL getUserByUsernameOrEmail(?)", [user.usernameOrEmail])
             .then((val) => {
-                // console.log("val:", val[0][0]);
                 if(val[0][0].length != 0) {
                     userObject = val[0][0][0];
                     correctPassword = userObject.password;
                 } else {
-                    // throw("User does not exist.");
                     reject("user dne");
                 }
-                console.log(correctPassword);
+                console.log("correctPassword:", correctPassword);
             })
             .then(async () => {
                 if (await bcrypt.compare(user.password, correctPassword)) {
                     console.log("password is correct");
-                    // return userObject;
                     resolve(userObject);
                 } else {
                     console.log("password is incorrect");
-                    // return undefined;
                     reject("incorrect pw");
                 }
-            })
-            .catch((err) => {
-                console.log("inside catch in loginUser repo");
-                console.log("err:", err);
-                // return undefined;
-                reject(err);
-            })
-            .finally(() => knex.destroy);
+            });
         });
     },
-
-    // addUser: (userId, newUser) => {
-    //     return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, newUser.password, newUser.imageUrl, "guest"])
-    //     .finally(() => knex.destroy);
-    // },
-
-    // addUser: async (userId, newUser) => {
-    //     try {
-    //         const hashedPassword = await bcrypt.hash(newUser.password, 10);
-    //         console.log(hashedPassword);
-    //         return knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?, ?)", [userId, newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
-    //         .finally(() => knex.destroy);
-    //     } catch(err) {
-    //         console.log("inside catch in addUser in repo");
-    //         return err;
-    //     }
-    // },
 
     addUser: async (newUser) => {
         try {
             const hashedPassword = await bcrypt.hash(newUser.password, 10);
-            console.log(hashedPassword);
-            return knex.raw("CALL postUser_new(?, ?, ?, ?, ?, ?, ?)", [newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
-            .finally(() => knex.destroy);
+            console.log("hashedPassword:", hashedPassword);
+            return knex.raw("CALL postUser_new(?, ?, ?, ?, ?, ?, ?)", [newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"]);
         } catch(err) {
             console.log("inside catch in addUser in repo");
             console.log("err:", err);
@@ -123,19 +59,42 @@ const usersRepo = {
         }
     },
     
-    editUser: (userId, updatedUser) => {
-        return knex.raw("CALL putUser(?, ?, ?, ?, ?, ?, ?)", [userId, updatedUser.firstname, updatedUser.lastname, updatedUser.username, updatedUser.email, updatedUser.password, updatedUser.imageUrl])
-        .finally(() => knex.destroy);
+    // editUser: (userId, updatedUser) => {
+    //     return knex.raw("CALL putUser(?, ?, ?, ?, ?, ?, ?)", [userId, updatedUser.firstname, updatedUser.lastname, updatedUser.username, updatedUser.email, updatedUser.password, updatedUser.imageUrl])
+    //     .finally(() => knex.destroy);
+    // },
+
+    editUser: (updatedUser) => {
+        let oldPassword = "";
+        let newPassword = "";
+        let oldUser;
+
+        return new Promise((resolve, reject) => {
+            knex.raw("CALL getUserByUsernameOrEmail(?)", [updatedUser.username])
+            .then((val) => {
+                if(val[0][0].length != 0) {
+                    oldUser = val[0][0][0];
+                    oldPassword = oldUser.password;
+                } else {
+                    reject("user dne");
+                }
+                console.log("oldPassword:", oldPassword);
+            })
+            .then(async () => {
+                if (await bcrypt.compare(updatedUser.password, oldPassword)) {
+                    newPassword = oldPassword;
+                } else {
+                    newPassword = await bcrypt.hash(updatedUser.password, 10);
+                }
+
+                knex.raw("CALL putUser_new(?, ?, ?, ?, ?, ?, ?)", [oldUser.id, updatedUser.firstname, updatedUser.lastname, updatedUser.username, updatedUser.email, newPassword, updatedUser.imageUrl])
+                .then(() => resolve());
+            })
+        });
     },
 
     deleteUser: (userId) => {
-        return knex.raw("CALL deleteUser(?)", [userId])
-        .finally(() => knex.destroy);
-    },
-
-    getReviewsByUser: (userId) => {
-        return knex.raw("CALL getReviewsByUser(?)", [userId])
-        .finally(() => knex.destroy);
+        return knex.raw("CALL deleteUser_new(?)", [userId]);
     }
 };
 

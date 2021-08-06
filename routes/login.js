@@ -17,11 +17,11 @@ router.get('/protected', passport.authenticate('jwt', { session: false }), (req,
 router.post('/login', (req, res, next) => {
     console.log("inside login router");
 
-    usersRepo.loginUser2(req.body)
+    usersRepo.loginUser(req.body)
     .then((userObject) => {
-        // console.log("userObject:", userObject);
         const tokenObject = issueJWT(userObject);
-        console.log("tokenObject:", tokenObject);
+        // console.log("tokenObject:", tokenObject);
+        // console.log("userObject:", userObject);
 
         res.status(200).json({
             success: true,
@@ -37,23 +37,23 @@ router.post('/login', (req, res, next) => {
     })
 });
 
-router.post('/signup', (req, res, next) => {
-    usersRepo.addUser(req.body)
-    .then((val) => {
-        const userObject = val[0][0][0];
-        const tokenObject = issueJWT(userObject);
-        console.log("tokenObject:", tokenObject);
+// router.post('/signup', (req, res, next) => {
+//     usersRepo.addUser(req.body)
+//     .then((val) => {
+//         const userObject = val[0][0][0];
+//         const tokenObject = issueJWT(userObject);
+//         console.log("tokenObject:", tokenObject);
 
-        res.status(201).json({
-            success: true,
-            user: userObject,
-            token: tokenObject.token,
-            expiresIn: tokenObject.expires
-        })
-    })
-    .catch((err) => {
-        next(err);
-    })
-});
+//         res.status(201).json({
+//             success: true,
+//             user: userObject,
+//             token: tokenObject.token,
+//             expiresIn: tokenObject.expires
+//         })
+//     })
+//     .catch((err) => {
+//         next(err);
+//     })
+// });
 
 module.exports = router;

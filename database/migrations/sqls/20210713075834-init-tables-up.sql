@@ -29,6 +29,29 @@ BEGIN
     WHERE `userName` = `p_userName`;
 END;
 
+CREATE PROCEDURE `putUser_new`(
+	IN `p_id` INT,
+	IN `p_firstname` VARCHAR(255),
+    IN `p_lastname` VARCHAR(255),
+    IN `p_username` VARCHAR(255),
+    IN `p_email` VARCHAR(255),
+    IN `p_password` CHAR(60),
+    IN `p_imageUrl` VARCHAR(255)
+)
+BEGIN
+	UPDATE `users_new`
+    SET `firstname` = `p_firstname`, `lastname` = `p_lastname`, `username` = `p_username`, `email` = `p_email`, `password` = `p_password`, `imageUrl` = `p_imageUrl`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `deleteUser_new`(
+	IN `p_id` INT
+)
+BEGIN
+	DELETE FROM `users_new`
+    WHERE `id` = `p_id`;
+END;
+
 -- USERS OLD
 
 CREATE TABLE `users` (
@@ -666,6 +689,22 @@ CREATE TABLE `reviews_flat` (
     CONSTRAINT `bookAndUser` UNIQUE(`bookId`, `userId`)
 );
 
+CREATE PROCEDURE `getReviews_flat`(
+	IN `p_bookId` INT
+)
+BEGIN
+	SELECT *  FROM `reviews_flat`
+    WHERE `bookId` = `p_bookId`;
+END;
+
+CREATE PROCEDURE `getReviewsByUser_flat`(
+    IN `p_userId` INT
+)
+BEGIN
+	SELECT *  FROM `reviews_flat`
+    WHERE `userId` = `p_userId`;
+END;
+
 CREATE PROCEDURE `postReview_flat`(
     IN `p_rating` FLOAT(3, 2),
     IN `p_review` TEXT,
@@ -706,6 +745,14 @@ CREATE PROCEDURE `deleteReviewsByBook_flat`(
 BEGIN
     DELETE FROM `reviews_flat`
     WHERE `bookId` = `p_bookId`;
+END;
+
+CREATE PROCEDURE `deleteReviewsByUser_flat`(
+    IN `p_userId` INT
+)
+BEGIN
+    DELETE FROM `reviews_flat`
+    WHERE `userId` = `p_userId`;
 END;
 
 CREATE PROCEDURE `changeTotalRating_flat`(
@@ -786,14 +833,6 @@ CREATE TABLE `reviews` (
         ON DELETE CASCADE,
     CONSTRAINT `bookAndUser` UNIQUE(`bookId`, `userId`)
 );
-
-CREATE PROCEDURE `getReviews_flat`(
-	IN `p_bookId` INT
-)
-BEGIN
-	SELECT *  FROM `reviews_flat`
-    WHERE `bookId` = `p_bookId`;
-END;
 
 CREATE PROCEDURE `getReviewsByUser`(
     IN `p_userId` VARCHAR(48)
@@ -945,6 +984,22 @@ CREATE TABLE `comments_flat` (
     `userName` VARCHAR(255) NOT NULL
 );
 
+CREATE PROCEDURE `getComment_flat`(
+	IN `p_id` INT
+)
+BEGIN
+	SELECT *  FROM `comments_flat`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `getComments_flat`(
+	IN `p_reviewId` INT
+)
+BEGIN
+	SELECT *  FROM `comments_flat`
+    WHERE `reviewId` = `p_reviewId`;
+END;
+
 CREATE PROCEDURE `postComment_flat`(
     IN `p_comment` TEXT,
     IN `p_bookId` INT,
@@ -993,6 +1048,14 @@ CREATE PROCEDURE `deleteCommentsByReview_flat`(
 BEGIN
     DELETE FROM `comments_flat`
     WHERE `reviewId` = `p_reviewId`;
+END;
+
+CREATE PROCEDURE `deleteCommentsByUser_flat`(
+    IN `p_userId` INT
+)
+BEGIN
+    DELETE FROM `comments_flat`
+    WHERE `userId` = `p_userId`;
 END;
 
 -- COMMENTS OLD

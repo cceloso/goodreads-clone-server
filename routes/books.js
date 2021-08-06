@@ -46,13 +46,8 @@ router.get('/?genre=:genreId', controller.getBooks);
 
 /* -- REVIEWS -- */
 
-/* View reviews of book */
-router.get('/:bookId/reviews', controller.getReview);
-
-/* View specific review of book */
 router.get('/:bookId/reviews/:reviewId', controller.getReview);
-
-/* Add review */
+router.get('/:bookId/reviews', controller.getReviews);
 router.post('/:bookId/reviews', controller.postReview);
 
 /* Edit review */
@@ -70,14 +65,11 @@ router.delete('/:bookId/reviews/', controller.deleteReview);
 
 /* -- COMMENTS -- */
 
-/* View comments of review */
-router.get('/:bookId/reviews/:reviewId/comments', controller.getComment);
-
-/* View specific comment of review */
 router.get('/:bookId/reviews/:reviewId/comments/:commentId', controller.getComment);
+router.get('/:bookId/reviews/:reviewId/comments', controller.getComments);
 
 /* Add comment */
-// router.post('/:bookId/reviews/:reviewId/comments?userId=:userId', controller.postComment);
+// router.post('/:bookId/reviews/:reviewId/comments/?userId=:userId', controller.postComment);
 router.post('/:bookId/reviews/:reviewId/comments', controller.postComment);
 
 /* Edit comment */

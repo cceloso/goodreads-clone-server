@@ -6,35 +6,45 @@ const url = require('url');
 
 const controller = {
     getReview: (req, res) => {
-        if(!req.params.reviewId) {
-            console.log("from getReviews: ");
-            reviewsRepo.getReviews(req.params.bookId)
-            .then((val) => {
-                let reviews = val[0][0];
-                res.status(200).json(reviews);
-            })
-            .catch((err) => {
-                errorCode = 500;
-                res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
-            })
-        } else {
-            console.log("from getReview: ");
-            reviewsRepo.getReview(req.params.reviewId)
-            .then((review) => {
-                if(Object.keys(review).length === 0) {
-                    console.log("review not found");
-                    errorCode = 404;
-                    res.status(errorCode).json(responsesController.createErrorMessage(404, "Review not found. Please provide a valid review id.", "NOT_FOUND"));
-                } else {
-                    console.log("review found");
-                    res.status(200).json(review);
-                }
-            })
-            .catch((err) => {
-                errorCode = 500;
-                res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
-            })
-        }
+        reviewsRepo.getReview(req.params.reviewId)
+        .then((review) => {
+            if(Object.keys(review).length === 0) {
+                console.log("review not found");
+                errorCode = 404;
+                res.status(errorCode).json(responsesController.createErrorMessage(404, "Review not found. Please provide a valid review id.", "NOT_FOUND"));
+            } else {
+                console.log("review found");
+                res.status(200).json(review);
+            }
+        })
+        .catch((err) => {
+            errorCode = 500;
+            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
+        })
+    },
+
+    getReviews: (req, res) => {
+        reviewsRepo.getReviews(req.params.bookId)
+        .then((val) => {
+            let reviews = val[0][0];
+            res.status(200).json(reviews);
+        })
+        .catch((err) => {
+            errorCode = 500;
+            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
+        })
+    },
+
+    getReviewsByUser: (req, res) => {
+        reviewsRepo.getReviewsByUser(req.params.userId)
+        .then((val) => {
+            let reviews = val[0][0];
+            res.status(200).json(reviews);
+        })
+        .catch((err) => {
+            errorCode = 500;
+            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
+        })
     },
 
     postReview: (req, res) => {
