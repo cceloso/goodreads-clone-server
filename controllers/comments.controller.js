@@ -38,22 +38,13 @@ const controller = {
         console.log("inside postComment in controller");
         const bookId = req.params.bookId;
         const reviewId = req.params.reviewId;
-        let reviewerId = "";
         const queryObject = url.parse(req.url, true).query;
         const userId = queryObject.userId;
         let userName = "";
-        console.log(`bookId: ${bookId}`);
-        console.log(`reviewId: ${reviewId}`);
-        console.log(`userId: ${userId}`);
 
-        reviewsRepo.getReviewerById(reviewId)
-        .then((val) => {
-            reviewerId = val[0][0][0]['userId'];
-            console.log("reviewerId:", reviewerId);
-        })
-        .then(() => usersRepo.getUserById(userId))
+        usersRepo.getUserById(userId)
         .then((val) => userName = val[0][0][0]['userName'])
-        .then(() => commentsRepo.addComment(req.body, bookId, reviewId, reviewerId, userId, userName))
+        .then(() => commentsRepo.addComment(req.body, bookId, reviewId, userId, userName))
         .then(() => {
             res.status(201).json({
                 message: "Successfully added a comment."

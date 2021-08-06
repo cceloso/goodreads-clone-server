@@ -12,8 +12,8 @@ const usersRepo = {
         .finally(() => knex.destroy);
     },
 
-    addComment: (newComment, bookId, reviewId, reviewerId, userId, userName) => {
-        return knex.raw("CALL postComment_flat(?, ?, ?, ?, ?, ?)", [newComment.comment, bookId, reviewId, reviewerId, userId, userName])
+    addComment: (newComment, bookId, reviewId, userId, userName) => {
+        return knex.raw("CALL postComment_flat(?, ?, ?, ?, ?)", [newComment.comment, bookId, reviewId, userId, userName])
         .then((val) => {
             const commentObject = val[0][0][0];
 
@@ -23,7 +23,6 @@ const usersRepo = {
                 dateCreated: commentObject.dateCreated,
                 bookId: commentObject.bookId,
                 reviewId: commentObject.reviewId,
-                reviewerId: commentObject.reviewerId,
                 userId: commentObject.userId,
                 userName: commentObject.userName
             };
@@ -60,10 +59,6 @@ const usersRepo = {
 
     deleteCommentsByReview: (reviewId) => {
         return knex.raw("CALL deleteCommentsByReview_flat(?)", [reviewId]);
-    },
-
-    deleteCommentsByReviewer: (reviewerId) => {
-        return knex.raw("CALL deleteCommentsByReviewer_flat(?)", [reviewerId]);
     },
 
     deleteCommentsByUser: (userId) => {

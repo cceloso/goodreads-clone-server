@@ -7,6 +7,7 @@ const commentsController = require('./comments.controller');
 const controller = {
     /* USERS CONTROLLER */
     getUser: usersController.getUser,
+    getUsers: usersController.getUsers,
     postUser: usersController.postUser,
     putUser: usersController.putUser,
     deleteUser: usersController.deleteUser,

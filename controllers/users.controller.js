@@ -11,6 +11,22 @@ const reviewsRepo = require('../repositories/reviews.repository');
 
 const controller = {
     getUser: (req, res) => {
+        usersRepo.getUser(req.params.userId)
+        .then((val) => {
+            if(Object.keys(val).length === 0) {
+                errorCode = 404;
+                throw "User not found.";
+            } else {
+                res.status(200).json(val);
+            }
+        })
+        .catch((err) => {
+            errorCode = 500;
+            res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+        });
+    },
+
+    getUsers: (req, res) => {
         new Promise((resolve, reject) => {
             if(!req.params.userId) {
                 console.log("from getAllUsers: ");
@@ -53,8 +69,8 @@ const controller = {
 
     postUser: (req, res) => {
         usersRepo.addUser(req.body)
-        .then((val) => {
-            const userObject = val[0][0][0];
+        .then((userObject) => {
+            // console.log("userObject in controller:", userObject);
             const tokenObject = issueJWT(userObject);
             console.log("tokenObject:", tokenObject);
 
@@ -71,7 +87,6 @@ const controller = {
                 
                 const dupEntryMessage = err.sqlMessage.split(' ');
                 const dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
-                console.log("dup entry key:", dupEntryKey);
                 
                 if(dupEntryKey == "'userName'") {
                     res.status(errorCode).json(responsesController.createErrorMessage(errorCode, "Username already taken", "DUPLICATE_ENTRY"));

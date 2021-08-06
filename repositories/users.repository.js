@@ -3,13 +3,14 @@ const redis = require('./redis');
 const bcrypt = require('bcrypt');
 
 const usersRepo = {
-    getAllUsers: () => {
-        return knex.raw("CALL getAllUsers()")
-        .finally(() => knex.destroy);
+    getUser: (userId) => {
+        // return knex.raw("CALL getUser(?, ?)", [user.username, user.password])
+        // .finally(() => knex.destroy);
+        return redis.hgetall(`users:${userId}`);
     },
 
-    getUser: (user) => {
-        return knex.raw("CALL getUser(?, ?)", [user.username, user.password])
+    getAllUsers: () => {
+        return knex.raw("CALL getAllUsers()")
         .finally(() => knex.destroy);
     },
 
@@ -51,18 +52,37 @@ const usersRepo = {
         try {
             const hashedPassword = await bcrypt.hash(newUser.password, 10);
             console.log("hashedPassword:", hashedPassword);
-            return knex.raw("CALL postUser_new(?, ?, ?, ?, ?, ?, ?)", [newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"]);
+            
+            return new Promise((resolve, reject) => {
+                knex.raw("CALL postUser_new(?, ?, ?, ?, ?, ?, ?)", [newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
+                .then((val) => {
+                    const userObject = val[0][0][0];
+                    const redisObject = {
+                        id: userObject.id,
+                        firstName: userObject.firstName,
+                        lastName: userObject.lastName,
+                        userName: userObject.userName,
+                        email: userObject.email,
+                        password: userObject.password,
+                        dateCreated: userObject.dateCreated,
+                        imageUrl: userObject.imageUrl,
+                        role: userObject.role,
+                    };
+
+                    console.log("redisObject:", redisObject);
+
+                    redis.hmset(`users:${userObject.id}`, redisObject);
+                    
+                    resolve(userObject);
+                })
+            });
+            
         } catch(err) {
             console.log("inside catch in addUser in repo");
             console.log("err:", err);
             return err;
         }
     },
-    
-    // editUser: (userId, updatedUser) => {
-    //     return knex.raw("CALL putUser(?, ?, ?, ?, ?, ?, ?)", [userId, updatedUser.firstname, updatedUser.lastname, updatedUser.username, updatedUser.email, updatedUser.password, updatedUser.imageUrl])
-    //     .finally(() => knex.destroy);
-    // },
 
     editUser: (updatedUser) => {
         let oldPassword = "";
@@ -88,13 +108,29 @@ const usersRepo = {
                 }
 
                 knex.raw("CALL putUser_new(?, ?, ?, ?, ?, ?, ?)", [oldUser.id, updatedUser.firstname, updatedUser.lastname, updatedUser.username, updatedUser.email, newPassword, updatedUser.imageUrl])
+                .then((val) => {
+                    const userObject = val[0][0][0];
+                    const redisObject = {
+                        id: userObject.id,
+                        firstName: userObject.firstName,
+                        lastName: userObject.lastName,
+                        userName: userObject.userName,
+                        email: userObject.email,
+                        password: userObject.password,
+                        dateCreated: userObject.dateCreated,
+                        imageUrl: userObject.imageUrl,
+                        role: userObject.role,
+                    };
+                    redis.hmset(`users:${userObject.id}`, redisObject);
+                })
                 .then(() => resolve());
             })
         });
     },
 
     deleteUser: (userId) => {
-        return knex.raw("CALL deleteUser_new(?)", [userId]);
+        return knex.raw("CALL deleteUser_new(?)", [userId])
+        .then(() => redis.del(`users:${userId}`));
     }
 };
 

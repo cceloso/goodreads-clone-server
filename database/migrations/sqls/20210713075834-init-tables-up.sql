@@ -12,6 +12,14 @@ CREATE TABLE `users_new` (
     `role` VARCHAR(255) NOT NULL
 );
 
+CREATE PROCEDURE `getUser`(
+	IN `p_id` INT
+)
+BEGIN
+	SELECT *  FROM `users_new`
+    WHERE `id` = `p_id`;
+END;
+
 CREATE PROCEDURE `postUser_new`(
 	IN `p_firstName` VARCHAR(255),
     IN `p_lastName` VARCHAR(255),
@@ -41,6 +49,9 @@ CREATE PROCEDURE `putUser_new`(
 BEGIN
 	UPDATE `users_new`
     SET `firstname` = `p_firstname`, `lastname` = `p_lastname`, `username` = `p_username`, `email` = `p_email`, `password` = `p_password`, `imageUrl` = `p_imageUrl`
+    WHERE `id` = `p_id`;
+
+    SELECT * FROM `users_new`
     WHERE `id` = `p_id`;
 END;
 
@@ -88,14 +99,6 @@ CREATE PROCEDURE `getAllUsers`()
 BEGIN
 	SELECT *  FROM `users`;
 END;
-
--- CREATE PROCEDURE `getUser`(
--- 	IN `p_id` VARCHAR(48)
--- )
--- BEGIN
--- 	SELECT *  FROM `users`
---     WHERE `id` = `p_id`;
--- END;
 
 CREATE PROCEDURE `getUser`(
 	IN `p_username` VARCHAR(48),
@@ -192,13 +195,12 @@ CREATE TABLE `books_flat` (
     CONSTRAINT `titleAndAuthor` UNIQUE(`title`, `author`)
 );
 
-CREATE PROCEDURE `getBooksByGenre_flat`(
-	IN `p_genre` VARCHAR(255)
+CREATE PROCEDURE `getBook_flat`(
+	IN `p_id` INT
 )
 BEGIN
-	SELECT *
-    FROM `books_flat`
-    WHERE `JSON_CONTAINS`(`genres`, `p_genre`);
+	SELECT *  FROM `books_flat`
+    WHERE `id` = `p_id`;
 END;
 
 CREATE PROCEDURE `getBooks_flat`()
@@ -206,12 +208,13 @@ BEGIN
 	SELECT *  FROM `books_flat`;
 END;
 
-CREATE PROCEDURE `getBook_flat`(
-	IN `p_id` INT
+CREATE PROCEDURE `getBooksByGenre_flat`(
+	IN `p_genre` VARCHAR(255)
 )
 BEGIN
-	SELECT *  FROM `books_flat`
-    WHERE `id` = `p_id`;
+	SELECT *
+    FROM `books_flat`
+    WHERE `JSON_CONTAINS`(`genres`, `p_genre`);
 END;
 
 CREATE PROCEDURE `postBook_flat`(
@@ -988,7 +991,6 @@ CREATE TABLE `comments_flat` (
     `dateCreated` TIMESTAMP NOT NULL,
     `bookId` INT NOT NULL,
     `reviewId` INT NOT NULL,
-    `reviewerId` INT NOT NULL,
     `userId` INT NOT NULL,
     `userName` VARCHAR(255) NOT NULL
 );
@@ -1013,13 +1015,12 @@ CREATE PROCEDURE `postComment_flat`(
     IN `p_comment` TEXT,
     IN `p_bookId` INT,
     IN `p_reviewId` INT,
-    IN `p_reviewerId` INT,
     IN `p_userId` INT,
     IN `p_userName` VARCHAR(255)
 )
 BEGIN
-    INSERT INTO `comments_flat` (`comment`, `dateCreated`, `bookId`, `reviewId`, `reviewerId`, `userId`, `userName`)
-    VALUES (`p_comment`, NOW(), `p_bookId`, `p_reviewId`, `p_reviewerId`, `p_userId`, `p_userName`);
+    INSERT INTO `comments_flat` (`comment`, `dateCreated`, `bookId`, `reviewId`, `userId`, `userName`)
+    VALUES (`p_comment`, NOW(), `p_bookId`, `p_reviewId`, `p_userId`, `p_userName`);
 
     SELECT * FROM `comments_flat` WHERE `id` = (
         SELECT MAX(`id`) FROM `comments_flat`
@@ -1058,14 +1059,6 @@ CREATE PROCEDURE `deleteCommentsByReview_flat`(
 BEGIN
     DELETE FROM `comments_flat`
     WHERE `reviewId` = `p_reviewId`;
-END;
-
-CREATE PROCEDURE `deleteCommentsByReviewer_flat`(
-    IN `p_reviewerId` INT
-)
-BEGIN
-    DELETE FROM `comments_flat`
-    WHERE `reviewerId` = `p_reviewerId`;
 END;
 
 CREATE PROCEDURE `deleteCommentsByUser_flat`(

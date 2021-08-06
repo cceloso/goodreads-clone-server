@@ -15,7 +15,7 @@ router.put('/', controller.putUser);
 router.put('/:userId', controller.putUser);
 
 /* View all users */
-router.get('/', controller.getUser);
+router.get('/', controller.getUsers);
 
 /* View specific user */
 router.get('/:userId', controller.getUser);
