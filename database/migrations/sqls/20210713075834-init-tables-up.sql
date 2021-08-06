@@ -705,6 +705,14 @@ BEGIN
     WHERE `userId` = `p_userId`;
 END;
 
+CREATE PROCEDURE `getReviewerById_flat`(
+    IN `p_id` INT
+)
+BEGIN
+	SELECT `userId`  FROM `reviews_flat`
+    WHERE `id` = `p_id`;
+END;
+
 CREATE PROCEDURE `postReview_flat`(
     IN `p_rating` FLOAT(3, 2),
     IN `p_review` TEXT,
@@ -980,6 +988,7 @@ CREATE TABLE `comments_flat` (
     `dateCreated` TIMESTAMP NOT NULL,
     `bookId` INT NOT NULL,
     `reviewId` INT NOT NULL,
+    `reviewerId` INT NOT NULL,
     `userId` INT NOT NULL,
     `userName` VARCHAR(255) NOT NULL
 );
@@ -1004,12 +1013,13 @@ CREATE PROCEDURE `postComment_flat`(
     IN `p_comment` TEXT,
     IN `p_bookId` INT,
     IN `p_reviewId` INT,
+    IN `p_reviewerId` INT,
     IN `p_userId` INT,
     IN `p_userName` VARCHAR(255)
 )
 BEGIN
-    INSERT INTO `comments_flat` (`comment`, `dateCreated`, `bookId`, `reviewId`, `userId`, `userName`)
-    VALUES (`p_comment`, NOW(), `p_bookId`, `p_reviewId`, `p_userId`, `p_userName`);
+    INSERT INTO `comments_flat` (`comment`, `dateCreated`, `bookId`, `reviewId`, `reviewerId`, `userId`, `userName`)
+    VALUES (`p_comment`, NOW(), `p_bookId`, `p_reviewId`, `p_reviewerId`, `p_userId`, `p_userName`);
 
     SELECT * FROM `comments_flat` WHERE `id` = (
         SELECT MAX(`id`) FROM `comments_flat`
@@ -1048,6 +1058,14 @@ CREATE PROCEDURE `deleteCommentsByReview_flat`(
 BEGIN
     DELETE FROM `comments_flat`
     WHERE `reviewId` = `p_reviewId`;
+END;
+
+CREATE PROCEDURE `deleteCommentsByReviewer_flat`(
+    IN `p_reviewerId` INT
+)
+BEGIN
+    DELETE FROM `comments_flat`
+    WHERE `reviewerId` = `p_reviewerId`;
 END;
 
 CREATE PROCEDURE `deleteCommentsByUser_flat`(

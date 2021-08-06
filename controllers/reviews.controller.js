@@ -1,4 +1,5 @@
 const responsesController = require('./responses.controller');
+const reviewsHelperController = require('./reviews.helper.controller');
 const reviewsRepo = require('../repositories/reviews.repository');
 const commentsRepo = require('../repositories/comments.repository');
 const usersRepo = require('../repositories/users.repository');
@@ -87,16 +88,20 @@ const controller = {
         })
     },
 
+    // deleteReviewSubprocesses: (reviewId, bookId) => {
+    //     return reviewsRepo.decreaseTotalRating(reviewId, bookId)
+    //     .then(() => reviewsRepo.updateAverageRating(bookId))
+    //     .then(() => reviewsRepo.deleteReview(reviewId))
+    //     .then(() => console.log("deleted reviews"))
+    //     .then(() => commentsRepo.deleteCommentsByReview(reviewId))
+    // },
+
     deleteReview: (req, res) => {
         const reviewId = req.params.reviewId;
         const bookId = req.params.bookId;
 
-        reviewsRepo.decreaseTotalRating(reviewId, bookId)
-        .then(() => reviewsRepo.updateAverageRating(bookId))
-        .then(() => reviewsRepo.deleteReview(reviewId))
-        .then(() => console.log("deleted reviews"))
-        .then(() => commentsRepo.deleteCommentsByReview(reviewId))
-        .then((val) => {
+        reviewsHelperController.deleteReviewSubprocesses(reviewId, bookId)
+        .then(() => {
             console.log("deleted comments too");
             res.status(200).json({
                 message: `Successfully deleted review.`,
@@ -106,6 +111,18 @@ const controller = {
             errorCode = 500;
             res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
         })
+    },
+
+    deleteReviewsByUser: (reviews) => {
+        let reviewId;
+        let bookId;
+
+        for(let i = 0; i < reviews.length; i++) {
+            reviewId = reviews[i]['id'];
+            bookId = reviews[i]['bookId'];
+
+            reviewsHelperController.deleteReviewSubprocesses(reviewId, bookId);
+        }
     }
 };
 

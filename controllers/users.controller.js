@@ -1,9 +1,13 @@
 const responsesController = require('./responses.controller');
+const reviewsController = require('./reviews.controller');
+
+const commentsRepo = require('../repositories/comments.repository');
 const usersRepo = require('../repositories/users.repository');
 
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const issueJWT = require('../lib/utils');
+const reviewsRepo = require('../repositories/reviews.repository');
 
 const controller = {
     getUser: (req, res) => {
@@ -84,11 +88,8 @@ const controller = {
     putUser: (req, res) => {
         usersRepo.editUser(req.body)
         .then(() => {
-            // const userObject = val[0][0][0];
-
             res.status(201).json({
-                success: true
-                // user: userObject,
+                message: "Successfully edited user."
             })
         })
         .catch((err) => {
@@ -162,35 +163,22 @@ const controller = {
     // },
 
     deleteUser: (req, res) => {
-        new Promise((resolve, reject) => {
-            if(!req.params.userId) {
-                errorCode = 400;
-                reject(responsesController.createErrorMessage(400, "User id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
-            }
+        const userId = req.params.userId;
+        let reviewsByUser = [];
 
-            else {
-                usersRepo.deleteUser(req.params.userId)
-                    .then((val) => {
-                        if(val[0].affectedRows == 0) {
-                            errorCode = 404;
-                            reject(responsesController.createErrorMessage(404, "User not found. Please pass a valid user id.", "NOT_FOUND"));
-                        } else {
-                            resolve();
-                        }
-                    })
-                    .catch((err) => {
-                        errorCode = 500;
-                        reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                    })
-            }
-        })
+        commentsRepo.deleteCommentsByUser(userId)
+        .then(() => reviewsRepo.getReviewsByUser(userId))
+        .then((val) => reviewsByUser = val[0][0])
+        .then(() => reviewsController.deleteReviewsByUser(reviewsByUser))
+        .then(() => usersRepo.deleteUser(userId))
         .then(() => {
             res.status(200).json({
-                message: `Successfully deleted user with id ${req.params.userId}.`,
+                message: "Successfully deleted user."
             });
         })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
+        .catch((err) => {
+            errorCode = 500;
+            res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
         })
     },
 

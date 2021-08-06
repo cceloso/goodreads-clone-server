@@ -14,6 +14,10 @@ const reviewsRepo = {
         return knex.raw("CALL getReviewsByUser_flat(?)", [userId]);
     },
 
+    getReviewerById: (reviewId) => {
+        return knex.raw("CALL getReviewerById_flat(?)", [reviewId]);
+    },
+
     addReview: (newReview, bookId, userId, userName) => {
         return knex.raw("CALL postReview_flat(?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, userId, userName])
         .then((val) => {
@@ -57,6 +61,10 @@ const reviewsRepo = {
 
     deleteReviewsByBook: (bookId) => {
         return knex.raw("CALL deleteReviewsByBook_flat(?)", [bookId]);
+    },
+
+    deleteReviewsByUser: (userId) => {
+        return knex.raw("CALL deleteReviewsByUser_flat(?)", [userId]);
     },
 
     changeTotalRating: (reviewId, rating, bookId) => {

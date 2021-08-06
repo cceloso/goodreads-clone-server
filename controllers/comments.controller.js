@@ -1,4 +1,5 @@
 const responsesController = require('./responses.controller');
+const reviewsRepo = require('../repositories/reviews.repository');
 const commentsRepo = require('../repositories/comments.repository');
 const usersRepo = require('../repositories/users.repository');
 const url = require('url');
@@ -37,6 +38,7 @@ const controller = {
         console.log("inside postComment in controller");
         const bookId = req.params.bookId;
         const reviewId = req.params.reviewId;
+        let reviewerId = "";
         const queryObject = url.parse(req.url, true).query;
         const userId = queryObject.userId;
         let userName = "";
@@ -44,9 +46,14 @@ const controller = {
         console.log(`reviewId: ${reviewId}`);
         console.log(`userId: ${userId}`);
 
-        usersRepo.getUserById(userId)  
+        reviewsRepo.getReviewerById(reviewId)
+        .then((val) => {
+            reviewerId = val[0][0][0]['userId'];
+            console.log("reviewerId:", reviewerId);
+        })
+        .then(() => usersRepo.getUserById(userId))
         .then((val) => userName = val[0][0][0]['userName'])
-        .then(() => commentsRepo.addComment(req.body, bookId, reviewId, userId, userName))
+        .then(() => commentsRepo.addComment(req.body, bookId, reviewId, reviewerId, userId, userName))
         .then(() => {
             res.status(201).json({
                 message: "Successfully added a comment."
