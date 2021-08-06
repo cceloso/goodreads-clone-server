@@ -5,7 +5,7 @@ const commentsRepo = require('../repositories/comments.repository');
 const reviewsRepo = require('../repositories/reviews.repository');
 const usersRepo = require('../repositories/users.repository');
 
-const issueJWT = require('../lib/utils');
+const issueJWT = require('../auth/jwt');
 
 const controller = {
     getUser: (req, res) => {

@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 
 const issueJWT = (user) => {
-  
     const _id = user.id;
     const expiresIn = '1d';
 
@@ -10,14 +9,12 @@ const issueJWT = (user) => {
         iat: Date.now()
     };
 
-    const PRIV_KEY = "secret";
-
-    const signedToken = jwt.sign(payload, PRIV_KEY, { expiresIn: expiresIn });
+    const signedToken = jwt.sign(payload, "secret", { expiresIn: expiresIn });
 
     return {
         token: "Bearer " + signedToken,
         expires: expiresIn
-    }
+    };
 }
 
 module.exports = issueJWT;

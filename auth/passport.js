@@ -1,9 +1,7 @@
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-const fs = require('fs');
-const path = require('path');
 
-const usersRepo = require('./repositories/users.repository');
+const usersRepo = require('../repositories/users.repository');
 
 const options = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -20,6 +18,7 @@ module.exports = (passport) => {
         })
         .catch((err) => {
             console.log("user not authorized");
+            console.log("err:", err);
             return done(err, false);
         })
     }));
