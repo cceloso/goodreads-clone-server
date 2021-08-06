@@ -1,7 +1,8 @@
 const responsesController = require('./responses.controller');
-const reviewsRepo = require('../repositories/reviews.repository');
+
 const commentsRepo = require('../repositories/comments.repository');
 const usersRepo = require('../repositories/users.repository');
+
 const url = require('url');
 
 const controller = {
@@ -10,14 +11,13 @@ const controller = {
         .then((val) => {
             let comment = val[0][0];
             if(comment.length == 0) {
-                throw "Comment not found. Please provide a valid comment id.", "NOT_FOUND";
+                responsesController.sendError(res, 404, "Comment not found.", "NOT_FOUND");
             } else {
-                res.status(200).json(comment);
+                responsesController.sendData(res, 200, comment);
             }
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         });
     },
 
@@ -25,16 +25,18 @@ const controller = {
         commentsRepo.getComments(req.params.reviewId)
         .then((val) => {
             let comments = val[0][0];
-            res.status(200).json(comments);
+            responsesController.sendData(res, 200, comments);
         })
         .catch((err) => {
-            console.log("here");
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(500, err, "ERROR"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         });
     },
 
     postComment: (req, res) => {
+        if(Object.keys(req.body).length === 0) {
+            responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
+        }
+
         console.log("inside postComment in controller");
         const bookId = req.params.bookId;
         const reviewId = req.params.reviewId;
@@ -46,17 +48,18 @@ const controller = {
         .then((val) => userName = val[0][0][0]['userName'])
         .then(() => commentsRepo.addComment(req.body, bookId, reviewId, userId, userName))
         .then(() => {
-            res.status(201).json({
-                message: "Successfully added a comment."
-            });
+            responsesController.sendData(res, 201, {message: "Successfully added a comment."});
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
     putComment: (req, res) => {
+        if(Object.keys(req.body).length === 0) {
+            responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
+        }
+
         const commentId = req.params.commentId;
         const bookId = req.params.bookId;
         const reviewId = req.params.reviewId;
@@ -69,26 +72,11 @@ const controller = {
         console.log(`userId: ${userId}`);
 
         commentsRepo.editComment(commentId, req.body)
-        // .then((val) => {
-        //     console.log("val:", val[0].affectedRows);
-        //     // res.status(200).json("test");
-        //     if(val[0].affectedRows === 0) {
-        //         errorCode = 404;
-        //         res.status(errorCode).json(responsesController.createErrorMessage(errorCode, "Comment not found. Please pass a valid comment id.", "NOT_FOUND"));
-        //     } else {
-        //         res.status(200).json({
-        //             message: `Successfully edited comment.`
-        //         });
-        //     }
-        // })
         .then(() => {
-            res.status(200).json({
-                message: `Successfully edited comment.`
-            });
+            responsesController.sendData(res, 200, {message: "Successfully edited comment."});
         })
         .catch((err) => {
-            errorCode = 400;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
@@ -102,13 +90,10 @@ const controller = {
 
         commentsRepo.deleteComment(commentId)
         .then(() => {
-            res.status(200).json({
-                message: `Successfully deleted comment.`,
-            });
+            responsesController.sendData(res, 200, {message: "Successfully deleted comment."});
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     }
 };

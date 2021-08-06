@@ -30,7 +30,7 @@ const usersRepo = {
                     userObject = val[0][0][0];
                     correctPassword = userObject.password;
                 } else {
-                    reject("user dne");
+                    reject("Invalid user.");
                 }
                 console.log("correctPassword:", correctPassword);
             })
@@ -40,7 +40,7 @@ const usersRepo = {
                     resolve(userObject);
                 } else {
                     console.log("password is incorrect");
-                    reject("incorrect pw");
+                    reject("Invalid password.");
                 }
             });
         });
@@ -73,6 +73,10 @@ const usersRepo = {
                     
                     resolve(userObject);
                 })
+                .catch((err) => {
+                    // console.log("err in repo:", err);
+                    reject(err);
+                });
             });
             
         } catch(err) {

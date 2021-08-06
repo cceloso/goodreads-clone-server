@@ -2,8 +2,8 @@ const responsesController = require('./responses.controller');
 const reviewsController = require('./reviews.controller');
 
 const commentsRepo = require('../repositories/comments.repository');
-const usersRepo = require('../repositories/users.repository');
 const reviewsRepo = require('../repositories/reviews.repository');
+const usersRepo = require('../repositories/users.repository');
 
 const issueJWT = require('../lib/utils');
 
@@ -12,61 +12,61 @@ const controller = {
         usersRepo.getUser(req.params.userId)
         .then((val) => {
             if(Object.keys(val).length === 0) {
-                errorCode = 404;
-                throw "User not found.";
+                responsesController.sendError(res, 404, "User not found.", "NOT_FOUND");
             } else {
-                res.status(200).json(val);
+                responsesController.sendData(res, 200, val);
             }
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+            responsesController.sendError(res, 500, err, "SERVER_ERROR");
         });
     },
 
     postUser: (req, res) => {
+        if(Object.keys(req.body).length === 0) {
+            responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
+        }
+
         usersRepo.addUser(req.body)
         .then((userObject) => {
-            // console.log("userObject in controller:", userObject);
             const tokenObject = issueJWT(userObject);
             console.log("tokenObject:", tokenObject);
 
-            res.status(201).json({
+            responsesController.sendData(res, 201, {
                 success: true,
                 user: userObject,
                 token: tokenObject.token,
                 expiresIn: tokenObject.expires
-            })
+            });
         })
         .catch((err) => {
             if(err.code === "ER_DUP_ENTRY") {
-                errorCode = 409;
-                
                 const dupEntryMessage = err.sqlMessage.split(' ');
                 const dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
+                console.log("dupEntryKey:", dupEntryKey);
                 
                 if(dupEntryKey == "'userName'") {
-                    res.status(errorCode).json(responsesController.createErrorMessage(errorCode, "Username already taken", "DUPLICATE_ENTRY"));
+                    responsesController.sendError(res, 409, "Username already taken", "DUPLICATE_ENTRY");
                 } else if(dupEntryKey == "'email'") {
-                    res.status(errorCode).json(responsesController.createErrorMessage(errorCode, "Email already taken", "DUPLICATE_ENTRY"));
+                    responsesController.sendError(res, 409, "Email already taken", "DUPLICATE_ENTRY");
                 }
             } else {
-                errorCode = 400;
-                res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "BAD_REQUEST"));
+                responsesController.sendError(res, 400, err, "BAD_REQUEST");
             }
         })
     },
 
     putUser: (req, res) => {
+        if(Object.keys(req.body).length === 0) {
+            responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
+        }
+        
         usersRepo.editUser(req.body)
         .then(() => {
-            res.status(201).json({
-                message: "Successfully edited user."
-            })
+            responsesController.sendData(res, 201, {message: "Successfully edited user."});
         })
         .catch((err) => {
-            errorCode = 400;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "BAD_REQUEST"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
@@ -80,13 +80,10 @@ const controller = {
         .then(() => reviewsController.deleteReviewsByUser(reviewsByUser))
         .then(() => usersRepo.deleteUser(userId))
         .then(() => {
-            res.status(200).json({
-                message: "Successfully deleted user."
-            });
+            responsesController.sendData(res, 200, {message: "Successfully deleted user."});
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
@@ -94,20 +91,15 @@ const controller = {
         usersRepo.loginUser(req.body)
         .then((userObject) => {
             const tokenObject = issueJWT(userObject);
-            // console.log("tokenObject:", tokenObject);
-            // console.log("userObject:", userObject);
 
-            res.status(200).json({
+            responsesController.sendData(res, 200, {
                 success: true,
                 token: tokenObject.token,
                 expiresIn: tokenObject.expires
             });
         })
         .catch((err) => {
-            console.error(err);
-            res.status(400).json({
-                error: err
-            });
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         });
     }
 };

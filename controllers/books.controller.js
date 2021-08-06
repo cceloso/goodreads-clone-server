@@ -1,25 +1,23 @@
 const responsesController = require('./responses.controller');
+
 const booksRepo = require('../repositories/books.repository');
 const reviewsRepo = require('../repositories/reviews.repository');
 const commentsRepo = require('../repositories/comments.repository');
+
 const url = require('url');
-// const { nanoid } = require('nanoid');
 
 const controller = {
     getBook: (req, res) => {
         booksRepo.getBook(req.params.bookId)
         .then((val) => {
             if(Object.keys(val).length === 0) {
-                errorCode = 404;
-                throw "Book not found. Please provide a valid book id.";
+                responsesController.sendError(res, 404, "Book not found.", "NOT_FOUND");
             } else {
-                // console.log("hgetall return value:", val);
-                res.status(200).json(val);
+                responsesController.sendData(res, 200, val);
             }
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
@@ -27,33 +25,33 @@ const controller = {
         const queryObject = url.parse(req.url, true).query;
         const genre = queryObject.genre;
 
-        if(genre == "all") {
+        if(genre == "all" || genre == undefined) {
             booksRepo.getBooks()
             .then((val) => {
                 let books = val[0][0];
-                res.status(200).json(books);
+                responsesController.sendData(res, 200, books);
             })
         } else {
             booksRepo.getBooksByGenre(genre)
             .then((val) => {
                 let books = val[0][0];
                 if(books.length != 0) {
-                    console.log("specific, testing");
-                    res.status(200).json(books);
+                    responsesController.sendData(res, 200, books);
                 } else {
-                    errorCode = 404;
-                    res.status(errorCode).json(responsesController.createErrorMessage(errorCode, "Genre not found or no books associated with that genre.", "NOT_FOUND"));
+                    responsesController.sendError(res, 404, "Genre not found or no books associated with that genre.", "NOT_FOUND");
                 }
             })
         }
     },
 
     postBook: (req, res) => {
+        if(Object.keys(req.body).length === 0) {
+            responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
+        }
+
         booksRepo.addBook(req.body)
         .then(() => {
-            res.status(201).json({
-                message: "Successfully added a book."
-            });
+            responsesController.sendData(res, 201, {message: "Successfully added a book."});
         })
         .catch((err) => {
             if(err.code == 'ER_DUP_ENTRY') {
@@ -62,31 +60,27 @@ const controller = {
                 errorCode = 409;
 
                 if(dupEntryKey == `'titleAndAuthor'`) {
-                    res.status(errorCode).json(responsesController.createErrorMessage(409, "Book with that title and author already exists.", "ALREADY_EXISTS"));
-                } else if(dupEntryKey == `'PRIMARY'`) {
-                    res.status(errorCode).json(responsesController.createErrorMessage(409, "Book with that id already exists.", "ALREADY_EXISTS"));
+                    responsesController.sendError(res, 409, "Book with that title and author already exists.", "DUPLICATE_ENTRY");
                 }
             }
 
             else {
-                console.log("postBook else in catch error:", err);
-                errorCode = 500;
-                res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+                responsesController.sendError(res, 400, err, "BAD_REQUEST");
             }
         })
     },
     
     putBook: (req, res) => {
+        if(Object.keys(req.body).length === 0) {
+            responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
+        }
+
         booksRepo.editBook(req.params.bookId, req.body)
         .then(() => {
-            res.status(201).json({
-                message: "Successfully edited book."
-            });
+            responsesController.sendData(res, 201, {message: "Successfully edited book."});
         })
         .catch((err) => {
-            console.log("putBook else in catch error:", err);
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+            responsesController.sendError(res, 404, err, "BAD_REQUEST");
         })
     },
 
@@ -97,13 +91,10 @@ const controller = {
         .then(() => reviewsRepo.deleteReviewsByBook(bookId))
         .then(() => booksRepo.deleteBook(bookId))
         .then(() => {
-            res.status(200).json({
-                message: `Successfully deleted book with id ${bookId}.`,
-            });
+            responsesController.sendData(res, 200, {message: "Successfully deleted book."});
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
+            responsesController.sendError(res, 404, err, "BAD_REQUEST");
         })
     }
 };

@@ -1,8 +1,9 @@
 const responsesController = require('./responses.controller');
 const reviewsHelperController = require('./reviews.helper.controller');
+
 const reviewsRepo = require('../repositories/reviews.repository');
-const commentsRepo = require('../repositories/comments.repository');
 const usersRepo = require('../repositories/users.repository');
+
 const url = require('url');
 
 const controller = {
@@ -11,16 +12,14 @@ const controller = {
         .then((review) => {
             if(Object.keys(review).length === 0) {
                 console.log("review not found");
-                errorCode = 404;
-                res.status(errorCode).json(responsesController.createErrorMessage(404, "Review not found. Please provide a valid review id.", "NOT_FOUND"));
+                responsesController.sendError(res, 404, "Review not found.", "NOT_FOUND");
             } else {
                 console.log("review found");
-                res.status(200).json(review);
+                responsesController.sendData(res, 200, review);
             }
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
@@ -28,11 +27,10 @@ const controller = {
         reviewsRepo.getReviews(req.params.bookId)
         .then((val) => {
             let reviews = val[0][0];
-            res.status(200).json(reviews);
+            responsesController.sendData(res, 200, reviews);
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
@@ -40,15 +38,18 @@ const controller = {
         reviewsRepo.getReviewsByUser(req.params.userId)
         .then((val) => {
             let reviews = val[0][0];
-            res.status(200).json(reviews);
+            responsesController.sendData(res, 200, reviews);
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "ERROR"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
     postReview: (req, res) => {
+        if(Object.keys(req.body).length === 0) {
+            responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
+        }
+
         const bookId = req.params.bookId;
         const queryObject = url.parse(req.url, true).query;
         const userId = queryObject.userId;
@@ -60,16 +61,18 @@ const controller = {
         .then(() => reviewsRepo.increaseTotalRating(req.body.rating, bookId))
         .then(() => reviewsRepo.updateAverageRating(bookId))
         .then(() => {
-            res.status(201).json({
-                message: "Successfully added a review."
-            });
+            responsesController.sendData(res, 201, {message: "Successfully added a review."});
         })
         .catch((err) => {
-            res.status(400).json(responsesController.createErrorMessage(400, err, "error in posting review"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
     putReview: (req, res) => {
+        if(Object.keys(req.body).length === 0) {
+            responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
+        }
+
         const reviewId = req.params.reviewId;
         const updatedReview = req.body;
         const bookId = req.params.bookId;
@@ -78,23 +81,12 @@ const controller = {
         .then(() => reviewsRepo.updateAverageRating(bookId))
         .then(() => reviewsRepo.editReview(reviewId, updatedReview))
         .then(() => {
-            res.status(200).json({
-                message: `Successfully edited review.`
-            });
+            responsesController.sendData(res, 200, {message: "Successfully edited review."});
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "UNKNOWN"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
-
-    // deleteReviewSubprocesses: (reviewId, bookId) => {
-    //     return reviewsRepo.decreaseTotalRating(reviewId, bookId)
-    //     .then(() => reviewsRepo.updateAverageRating(bookId))
-    //     .then(() => reviewsRepo.deleteReview(reviewId))
-    //     .then(() => console.log("deleted reviews"))
-    //     .then(() => commentsRepo.deleteCommentsByReview(reviewId))
-    // },
 
     deleteReview: (req, res) => {
         const reviewId = req.params.reviewId;
@@ -103,13 +95,10 @@ const controller = {
         reviewsHelperController.deleteReviewSubprocesses(reviewId, bookId)
         .then(() => {
             console.log("deleted comments too");
-            res.status(200).json({
-                message: `Successfully deleted review.`,
-            });
+            responsesController.sendData(res, 200, {message: "Successfully deleted review."});
         })
         .catch((err) => {
-            errorCode = 500;
-            res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
+            responsesController.sendError(res, 400, err, "BAD_REQUEST");
         })
     },
 
