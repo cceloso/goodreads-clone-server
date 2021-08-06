@@ -7,19 +7,19 @@ const reviewsRepo = {
     },
 
     getReviews: (bookId) => {
-        return knex.raw("CALL getReviews_flat(?)", [bookId]);
+        return knex.raw("CALL getReviews(?)", [bookId]);
     },
 
     getReviewsByUser: (userId) => {
-        return knex.raw("CALL getReviewsByUser_flat(?)", [userId]);
+        return knex.raw("CALL getReviewsByUser(?)", [userId]);
     },
 
     getReviewerById: (reviewId) => {
-        return knex.raw("CALL getReviewerById_flat(?)", [reviewId]);
+        return knex.raw("CALL getReviewerById(?)", [reviewId]);
     },
 
     addReview: (newReview, bookId, userId, userName) => {
-        return knex.raw("CALL postReview_flat(?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, userId, userName])
+        return knex.raw("CALL postReview(?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, userId, userName])
         .then((val) => {
             const reviewObject = val[0][0][0];
             // console.log("reviewObject:", reviewObject);
@@ -39,7 +39,7 @@ const reviewsRepo = {
     },
 
     editReview: (reviewId, updatedReview) => {
-        return knex.raw("CALL putReview_flat(?, ?, ?)", [reviewId, updatedReview.rating, updatedReview.review])
+        return knex.raw("CALL putReview(?, ?, ?)", [reviewId, updatedReview.rating, updatedReview.review])
         .then((val) => {
             if(val[0].affectedRows === 0) {
                 throw "Review not found. Please pass a valid review id.";
@@ -55,32 +55,32 @@ const reviewsRepo = {
     },
 
     deleteReview: (reviewId) => {
-        return knex.raw("CALL deleteReview_flat(?)", [reviewId])
+        return knex.raw("CALL deleteReview(?)", [reviewId])
         .then(() => redis.del(`reviews:${reviewId}`));
     },
 
     deleteReviewsByBook: (bookId) => {
-        return knex.raw("CALL deleteReviewsByBook_flat(?)", [bookId]);
+        return knex.raw("CALL deleteReviewsByBook(?)", [bookId]);
     },
 
     deleteReviewsByUser: (userId) => {
-        return knex.raw("CALL deleteReviewsByUser_flat(?)", [userId]);
+        return knex.raw("CALL deleteReviewsByUser(?)", [userId]);
     },
 
     changeTotalRating: (reviewId, rating, bookId) => {
-        return knex.raw("CALL changeTotalRating_flat(?, ?, ?)", [reviewId, rating, bookId]);
+        return knex.raw("CALL changeTotalRating(?, ?, ?)", [reviewId, rating, bookId]);
     },
 
     increaseTotalRating: (rating, bookId) => {
-        return knex.raw("CALL increaseTotalRating_flat(?, ?)", [rating, bookId]);
+        return knex.raw("CALL increaseTotalRating(?, ?)", [rating, bookId]);
     },
 
     decreaseTotalRating: (reviewId, bookId) => {
-        return knex.raw("CALL decreaseTotalRating_flat(?, ?)", [reviewId, bookId]);
+        return knex.raw("CALL decreaseTotalRating(?, ?)", [reviewId, bookId]);
     },
 
     updateAverageRating: (bookId) => {
-        return knex.raw("CALL updateAverageRating_flat(?)", [bookId]);
+        return knex.raw("CALL updateAverageRating(?)", [bookId]);
     }
 };
 

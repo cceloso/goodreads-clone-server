@@ -3,17 +3,17 @@ const redis = require('./redis');
 
 const usersRepo = {
     getComment: (commentId) => {
-        return knex.raw("CALL getComment_flat(?)", [commentId])
+        return knex.raw("CALL getComment(?)", [commentId])
         .finally(() => knex.destroy);
     },
     
     getComments: (reviewId) => {
-        return knex.raw("CALL getComments_flat(?)", [reviewId])
+        return knex.raw("CALL getComments(?)", [reviewId])
         .finally(() => knex.destroy);
     },
 
     addComment: (newComment, bookId, reviewId, userId, userName) => {
-        return knex.raw("CALL postComment_flat(?, ?, ?, ?, ?)", [newComment.comment, bookId, reviewId, userId, userName])
+        return knex.raw("CALL postComment(?, ?, ?, ?, ?)", [newComment.comment, bookId, reviewId, userId, userName])
         .then((val) => {
             const commentObject = val[0][0][0];
 
@@ -32,7 +32,7 @@ const usersRepo = {
     },
 
     editComment: (commentId, updatedComment) => {
-        return knex.raw("CALL putComment_flat(?, ?)", [commentId, updatedComment.comment])
+        return knex.raw("CALL putComment(?, ?)", [commentId, updatedComment.comment])
         .then((val) => {
             if(val[0].affectedRows === 0) {
                 throw "Comment not found. Please pass a valid comment id.";
@@ -43,7 +43,7 @@ const usersRepo = {
     },
 
     deleteComment: (commentId) => {
-        return knex.raw("CALL deleteComment_flat(?)", [commentId])
+        return knex.raw("CALL deleteComment(?)", [commentId])
         .then((val) => {
             if(val[0].affectedRows === 0) {
                 throw "Comment not found. Please pass a valid comment id.", "NOT_FOUND";
@@ -54,15 +54,15 @@ const usersRepo = {
     },
 
     deleteCommentsByBook: (bookId) => {
-        return knex.raw("CALL deleteCommentsByBook_flat(?)", [bookId]);
+        return knex.raw("CALL deleteCommentsByBook(?)", [bookId]);
     },
 
     deleteCommentsByReview: (reviewId) => {
-        return knex.raw("CALL deleteCommentsByReview_flat(?)", [reviewId]);
+        return knex.raw("CALL deleteCommentsByReview(?)", [reviewId]);
     },
 
     deleteCommentsByUser: (userId) => {
-        return knex.raw("CALL deleteCommentsByUser_flat(?)", [userId]);
+        return knex.raw("CALL deleteCommentsByUser(?)", [userId]);
     }
 };
 

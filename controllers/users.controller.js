@@ -3,11 +3,9 @@ const reviewsController = require('./reviews.controller');
 
 const commentsRepo = require('../repositories/comments.repository');
 const usersRepo = require('../repositories/users.repository');
-
-const bcrypt = require('bcrypt');
-const passport = require('passport');
-const issueJWT = require('../lib/utils');
 const reviewsRepo = require('../repositories/reviews.repository');
+
+const issueJWT = require('../lib/utils');
 
 const controller = {
     getUser: (req, res) => {
@@ -24,47 +22,6 @@ const controller = {
             errorCode = 500;
             res.status(errorCode).json(responsesController.createErrorMessage(500, err, "UNKNOWN"));
         });
-    },
-
-    getUsers: (req, res) => {
-        new Promise((resolve, reject) => {
-            if(!req.params.userId) {
-                console.log("from getAllUsers: ");
-                usersRepo.getAllUsers()
-                    .then((val) => {
-                        let users = val[0][0];
-                        resolve(users);
-                    })
-                    .catch((err) => {
-                        errorCode = 500;
-                        reject(responsesController.createErrorMessage(500, "Server-side error.", "ERROR"));
-                    })
-            }
-
-            else {
-                console.log("from getUsers: ");
-                usersRepo.getUserById(req.params.userId)
-                .then((val) => {
-                    let user = val[0][0];
-                    if(user.length == 0) {
-                        errorCode = 404;
-                        reject(responsesController.createErrorMessage(404, "User not found. Please provide a valid user id.", "NOT_FOUND"));
-                    } else {
-                        resolve(user);
-                    }
-                })
-                .catch((err) => {
-                    errorCode = 500;
-                    reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-                })
-            }
-        })
-        .then((usersToDisplay) => {
-            res.status(200).json(usersToDisplay);
-        })
-        .catch((errorMessage) => {
-            res.status(errorCode).json(errorMessage);
-        })
     },
 
     postUser: (req, res) => {
@@ -112,70 +69,6 @@ const controller = {
             res.status(errorCode).json(responsesController.createErrorMessage(errorCode, err, "BAD_REQUEST"));
         })
     },
-
-    // putUser: (req, res) => {
-    //     new Promise((resolve, reject) => {
-    //         const expectedAttributes = 6;
-
-    //         if(!req.params.userId) {
-    //             errorCode = 400;
-    //             reject(responsesController.createErrorMessage(400, "User id parameter is empty. Please pass valid parameter.", "INVALID_ARGUMENT"));
-    //         }
-
-    //         else if(!req.body.data) {
-    //             errorCode = 400;
-    //             reject(responsesController.createErrorMessage(400, "Body of request is empty. Please pass valid body data.", "INVALID_ARGUMENT"));
-    //         }
-
-    //         else {
-    //             if(Object.keys(req.body.data).length < expectedAttributes) {
-    //                 errorCode = 400;
-    //                 reject(responsesController.createErrorMessage(400, "Request body data has incomplete attributes.", "INVALID_ARGUMENT"));
-    //             } else if(Object.keys(req.body.data).length > expectedAttributes) {
-    //                 errorCode = 400;
-    //                 reject(responsesController.createErrorMessage(400, "Request body data has extra attributes.", "INVALID_ARGUMENT"));
-    //             } else {
-    //                 usersRepo.editUser(req.params.userId, req.body.data)
-    //                     .then((val) => {
-    //                         if(val[0].affectedRows == 0) {
-    //                             errorCode = 404;
-    //                             reject(responsesController.createErrorMessage(404, "User not found. Please pass a valid user id.", "NOT_FOUND"));
-    //                         } else {
-    //                             resolve();
-    //                         }
-    //                     })
-    //                     .catch((err) => {
-    //                         if(err.code == 'ER_DUP_ENTRY') {
-    //                             let dupEntryMessage = err.sqlMessage.split(' ');
-    //                             let dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
-    //                             errorCode = 409;
-
-    //                             if(dupEntryKey == `'username'`) {
-    //                                 reject(responsesController.createErrorMessage(409, "User with that username already exists.", "ALREADY_EXISTS"));
-    //                             } else if(dupEntryKey == `'email'`) {
-    //                                 reject(responsesController.createErrorMessage(409, "User with that email address already exists.", "ALREADY_EXISTS"));
-    //                             } else if(dupEntryKey == `'PRIMARY'`) {
-    //                                 reject(responsesController.createErrorMessage(409, "User with that id already exists.", "ALREADY_EXISTS"));
-    //                             }
-    //                         }
-
-    //                         else {
-    //                             errorCode = 500;
-    //                             reject(responsesController.createErrorMessage(500, err, "UNKNOWN"));
-    //                         }
-    //                     })
-    //             }
-    //         }
-    //     })
-    //     .then(() => {
-    //         res.status(200).json({
-    //             message: `Successfully edited user with id ${req.params.userId}.`
-    //         });
-    //     })
-    //     .catch((errorMessage) => {
-    //         res.status(errorCode).json(errorMessage);
-    //     })
-    // },
 
     deleteUser: (req, res) => {
         const userId = req.params.userId;

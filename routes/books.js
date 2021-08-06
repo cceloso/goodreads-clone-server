@@ -1,87 +1,78 @@
 var express = require('express');
 var router = express.Router();
-const controller = require('../controllers/main.controller');
+
+const booksController = require('../controllers/books.controller');
+const commentsController = require('../controllers/comments.controller');
+const reviewsController = require('../controllers/reviews.controller');
 
 /* -- BOOKS -- */
 
 /* Add book */
-router.post('/', controller.postBook);
+router.post('/', booksController.postBook);
 
 /* Add book (w/ bookId, invalid) */
-router.post('/:bookId', controller.postBook);
+router.post('/:bookId', booksController.postBook);
 
 /* Edit book (w/o bookId, invalid) */
-router.put('/', controller.putBook);
+router.put('/', booksController.putBook);
 
 /* Edit book */
-router.put('/:bookId', controller.putBook);
+router.put('/:bookId', booksController.putBook);
 
 /* View all books */
-router.get('/', controller.getBooks);
+router.get('/', booksController.getBooks);
 
 /* View specific book */
-router.get('/:bookId', controller.getBook);
+router.get('/:bookId', booksController.getBook);
 
 /* Delete specific book (w/o bookId, invalid) */
-router.delete('/', controller.deleteBook);
+router.delete('/', booksController.deleteBook);
 
 /* Delete specific book */
-router.delete('/:bookId', controller.deleteBook);
+router.delete('/:bookId', booksController.deleteBook);
 
 /* View books by genre */
-router.get('/?genre=:genreId', controller.getBooks);
-
-
-// /* -- GENRES -- */
-
-// /* View genres of a book */
-// router.get('/:bookId/genres', controller.getBookGenre);
-
-// /* Add genre to a book */
-// router.post('/:bookId/genres', controller.postBookGenre);
-
-// /* Delete genre of a book */
-// router.delete('/:bookId/genres/:genreId', controller.deleteBookAndGenre);
+router.get('/?genre=:genreId', booksController.getBooks);
 
 
 /* -- REVIEWS -- */
 
-router.get('/:bookId/reviews/:reviewId', controller.getReview);
-router.get('/:bookId/reviews', controller.getReviews);
-router.post('/:bookId/reviews', controller.postReview);
+router.get('/:bookId/reviews/:reviewId', reviewsController.getReview);
+router.get('/:bookId/reviews', reviewsController.getReviews);
+router.post('/:bookId/reviews', reviewsController.postReview);
 
 /* Edit review */
-router.put('/:bookId/reviews/:reviewId', controller.putReview);
+router.put('/:bookId/reviews/:reviewId', reviewsController.putReview);
 
 /* Edit review (w/o reviewId, invalid) */
-router.put('/:bookId/reviews', controller.putReview);
+router.put('/:bookId/reviews', reviewsController.putReview);
 
 /* Delete review */
-router.delete('/:bookId/reviews/:reviewId', controller.deleteReview);
+router.delete('/:bookId/reviews/:reviewId', reviewsController.deleteReview);
 
 /* Delete review (w/o reviewId, invalid) */
-router.delete('/:bookId/reviews/', controller.deleteReview);
+router.delete('/:bookId/reviews/', reviewsController.deleteReview);
 
 
 /* -- COMMENTS -- */
 
-router.get('/:bookId/reviews/:reviewId/comments/:commentId', controller.getComment);
-router.get('/:bookId/reviews/:reviewId/comments', controller.getComments);
+router.get('/:bookId/reviews/:reviewId/comments/:commentId', commentsController.getComment);
+router.get('/:bookId/reviews/:reviewId/comments', commentsController.getComments);
 
 /* Add comment */
-// router.post('/:bookId/reviews/:reviewId/comments/?userId=:userId', controller.postComment);
-router.post('/:bookId/reviews/:reviewId/comments', controller.postComment);
+// router.post('/:bookId/reviews/:reviewId/comments/?userId=:userId', commentsController.postComment);
+router.post('/:bookId/reviews/:reviewId/comments', commentsController.postComment);
 
 /* Edit comment */
-router.put('/:bookId/reviews/:reviewId/comments/:commentId', controller.putComment);
+router.put('/:bookId/reviews/:reviewId/comments/:commentId', commentsController.putComment);
 
 /* Edit comment (w/o commentId, invalid) */
-router.put('/:bookId/reviews/:reviewId/comments/:commentId', controller.putComment);
+router.put('/:bookId/reviews/:reviewId/comments/:commentId', commentsController.putComment);
 
 /* Delete comment */
-router.delete('/:bookId/reviews/:reviewId/comments/:commentId', controller.deleteComment);
+router.delete('/:bookId/reviews/:reviewId/comments/:commentId', commentsController.deleteComment);
 
 /* Delete comment (w/o commentId, invalid) */
-router.delete('/:bookId/reviews/:reviewId/comments', controller.deleteComment);
+router.delete('/:bookId/reviews/:reviewId/comments', commentsController.deleteComment);
 
 module.exports = router;

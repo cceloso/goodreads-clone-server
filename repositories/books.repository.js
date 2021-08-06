@@ -29,16 +29,16 @@ const booksRepo = {
     },
 
     getBooks: () => {
-        return knex.raw("CALL getBooks_flat()");
+        return knex.raw("CALL getBooks()");
     },
 
     getBooksByGenre: (genreId) => {
-        return knex.raw("CALL getBooksByGenre_flat(?)", [JSON.stringify(genreId)])
+        return knex.raw("CALL getBooksByGenre(?)", [JSON.stringify(genreId)])
         .finally(() => knex.destroy);
     },
 
     addBook: (newBook) => {
-        return knex.raw("CALL postBook_flat(?, ?, ?, ?, ?, ?, ?, ?)", [newBook.title, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, JSON.stringify(newBook.genres), newBook.imageUrl])
+        return knex.raw("CALL postBook(?, ?, ?, ?, ?, ?, ?, ?)", [newBook.title, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, JSON.stringify(newBook.genres), newBook.imageUrl])
         .then((val) => {
             const bookObject = val[0][0][0];
             addOrEditBookOnRedis(bookObject);
@@ -46,7 +46,7 @@ const booksRepo = {
     },
 
     editBook: (bookId, updatedBook) => {
-        return knex.raw("CALL putBook_flat(?, ?, ?, ?, ?, ?, ?, ?, ?)", [bookId, updatedBook.title, updatedBook.author, updatedBook.isbn, updatedBook.publisher, updatedBook.published, updatedBook.description, JSON.stringify(updatedBook.genres), updatedBook.imageUrl])
+        return knex.raw("CALL putBook(?, ?, ?, ?, ?, ?, ?, ?, ?)", [bookId, updatedBook.title, updatedBook.author, updatedBook.isbn, updatedBook.publisher, updatedBook.published, updatedBook.description, JSON.stringify(updatedBook.genres), updatedBook.imageUrl])
         .then((val) => {
             const bookObject = val[0][0][0];
             addOrEditBookOnRedis(bookObject);
@@ -54,7 +54,7 @@ const booksRepo = {
     },
 
     deleteBook: (bookId) => {
-        return knex.raw("CALL deleteBook_flat(?)", [bookId])
+        return knex.raw("CALL deleteBook(?)", [bookId])
         .then(() => redis.del(`books:${bookId}`));
     },
 };

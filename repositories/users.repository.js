@@ -4,8 +4,6 @@ const bcrypt = require('bcrypt');
 
 const usersRepo = {
     getUser: (userId) => {
-        // return knex.raw("CALL getUser(?, ?)", [user.username, user.password])
-        // .finally(() => knex.destroy);
         return redis.hgetall(`users:${userId}`);
     },
 
@@ -54,7 +52,7 @@ const usersRepo = {
             console.log("hashedPassword:", hashedPassword);
             
             return new Promise((resolve, reject) => {
-                knex.raw("CALL postUser_new(?, ?, ?, ?, ?, ?, ?)", [newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
+                knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?)", [newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
                 .then((val) => {
                     const userObject = val[0][0][0];
                     const redisObject = {
@@ -107,7 +105,7 @@ const usersRepo = {
                     newPassword = await bcrypt.hash(updatedUser.password, 10);
                 }
 
-                knex.raw("CALL putUser_new(?, ?, ?, ?, ?, ?, ?)", [oldUser.id, updatedUser.firstname, updatedUser.lastname, updatedUser.username, updatedUser.email, newPassword, updatedUser.imageUrl])
+                knex.raw("CALL putUser(?, ?, ?, ?, ?, ?, ?)", [oldUser.id, updatedUser.firstname, updatedUser.lastname, updatedUser.username, updatedUser.email, newPassword, updatedUser.imageUrl])
                 .then((val) => {
                     const userObject = val[0][0][0];
                     const redisObject = {
@@ -129,7 +127,7 @@ const usersRepo = {
     },
 
     deleteUser: (userId) => {
-        return knex.raw("CALL deleteUser_new(?)", [userId])
+        return knex.raw("CALL deleteUser(?)", [userId])
         .then(() => redis.del(`users:${userId}`));
     }
 };
