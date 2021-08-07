@@ -225,6 +225,14 @@ BEGIN
     VALUES (`p_name`);
 END;
 
+CREATE PROCEDURE `getGenre`(
+    IN `p_name` VARCHAR(255)
+)
+BEGIN
+	SELECT *  FROM `genres`
+    WHERE `name` = `p_name`;
+END;
+
 CREATE PROCEDURE `getGenres`()
 BEGIN
 	SELECT *  FROM `genres`;

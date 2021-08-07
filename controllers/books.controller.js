@@ -1,8 +1,9 @@
 const responsesController = require('./responses.controller');
 
 const booksRepo = require('../repositories/books.repository');
-const reviewsRepo = require('../repositories/reviews.repository');
 const commentsRepo = require('../repositories/comments.repository');
+const genresRepo = require('../repositories/genres.repository');
+const reviewsRepo = require('../repositories/reviews.repository');
 
 const url = require('url');
 
@@ -32,14 +33,17 @@ const controller = {
                 responsesController.sendData(res, 200, books);
             })
         } else {
-            booksRepo.getBooksByGenre(genre)
+            genresRepo.getGenre(genre)
+            .then((val) => {
+                if(val[0][0].length == 0) {
+                    console.log("genre does not exist")
+                    responsesController.sendError(res, 404, "Genre not found.", "NOT_FOUND");
+                }
+            })
+            .then(() => booksRepo.getBooksByGenre(genre))
             .then((val) => {
                 let books = val[0][0];
-                if(books.length != 0) {
-                    responsesController.sendData(res, 200, books);
-                } else {
-                    responsesController.sendError(res, 404, "Genre not found or no books associated with that genre.", "NOT_FOUND");
-                }
+                responsesController.sendData(res, 200, books);
             })
         }
     },
