@@ -73,7 +73,11 @@ const controller = {
             responsesController.sendData(res, 201, {message: "Successfully added a review."});
         })
         .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
+            if(err.code === "ER_DUP_ENTRY") {
+                responsesController.sendError(res, 409, "User has already written a review for the book.", "DUPLICATE_ENTRY");
+            } else {
+                responsesController.sendError(res, 400, err, "BAD_REQUEST");
+            }
         })
     },
 

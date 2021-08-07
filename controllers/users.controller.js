@@ -45,9 +45,9 @@ const controller = {
                 const dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
                 
                 if(dupEntryKey == "'userName'") {
-                    responsesController.sendError(res, 409, "Username already taken", "DUPLICATE_ENTRY");
+                    responsesController.sendError(res, 409, "Username already taken.", "DUPLICATE_ENTRY");
                 } else if(dupEntryKey == "'email'") {
-                    responsesController.sendError(res, 409, "Email already taken", "DUPLICATE_ENTRY");
+                    responsesController.sendError(res, 409, "Email already taken.", "DUPLICATE_ENTRY");
                 }
             } else {
                 responsesController.sendError(res, 400, err, "BAD_REQUEST");
