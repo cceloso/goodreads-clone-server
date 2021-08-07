@@ -259,19 +259,23 @@ BEGIN
     WHERE `userId` = `p_userId`;
 END;
 
+CREATE PROCEDURE `getRating`(
+    IN `p_id` INT
+)
+BEGIN
+    SELECT `rating` FROM `reviews`
+    WHERE `id` = `p_id`;
+END;
+
 CREATE PROCEDURE `changeTotalRating`(
     IN `p_id` INT,
+    IN `p_oldRating` FLOAT(3, 2),
     IN `p_newRating` FLOAT(3, 2),
     IN `p_bookId` INT
 )
 BEGIN
-	DECLARE `v_oldRating` FLOAT(3, 2);
-
-    SELECT `rating` INTO `v_oldRating` FROM `reviews`
-    WHERE `id` = `p_id`;
-
     UPDATE `books`
-    SET `totalRating` = `totalRating` - `v_oldRating` + `p_newRating`
+    SET `totalRating` = `totalRating` - `p_oldRating` + `p_newRating`
     WHERE `id` = `p_bookId`;
 END;
 
@@ -287,16 +291,12 @@ END;
 
 CREATE PROCEDURE `decreaseTotalRating`(
     IN `p_id` INT,
+    IN `p_rating` FLOAT(3, 2),
     IN `p_bookId` INT
 )
 BEGIN
-    DECLARE `v_rating` FLOAT(3, 2);
-
-    SELECT `rating` INTO `v_rating` FROM `reviews`
-    WHERE `id` = `p_id`;
-
     UPDATE `books`
-    SET `totalRating` = `totalRating` - `v_rating`, `ratingCtr` = `ratingCtr` - 1
+    SET `totalRating` = `totalRating` - `p_rating`, `ratingCtr` = `ratingCtr` - 1
     WHERE `id` = `p_bookId`;
 END;
 
@@ -318,6 +318,9 @@ BEGIN
         SET `averageRating` = `totalRating` / `ratingCtr`
         WHERE `id` = `p_bookId`;
     END IF;
+
+    SELECT `averageRating` FROM `books`
+    WHERE `id` = `p_bookId`;
 END;
 
 

@@ -1,20 +1,29 @@
 const responsesController = require('./responses.controller');
-const reviewsHelperController = require('./reviews.helper.controller');
 
+const commentsRepo = require('../repositories/comments.repository');
 const reviewsRepo = require('../repositories/reviews.repository');
 const usersRepo = require('../repositories/users.repository');
 
 const url = require('url');
+
+const deleteReviewSubprocesses = (reviewId, bookId) => {
+    let rating = 0;
+
+    return reviewsRepo.getRating(reviewId)
+    .then((val) => rating = val[0][0][0]['rating'])
+    .then(() => reviewsRepo.decreaseTotalRating(reviewId, rating, bookId))
+    .then(() => reviewsRepo.updateAverageRating(bookId))
+    .then(() => reviewsRepo.deleteReview(reviewId))
+    .then(() => commentsRepo.deleteCommentsByReview(reviewId))
+};
 
 const controller = {
     getReview: (req, res) => {
         reviewsRepo.getReview(req.params.reviewId)
         .then((review) => {
             if(Object.keys(review).length === 0) {
-                console.log("review not found");
                 responsesController.sendError(res, 404, "Review not found.", "NOT_FOUND");
             } else {
-                console.log("review found");
                 responsesController.sendData(res, 200, review);
             }
         })
@@ -76,8 +85,12 @@ const controller = {
         const reviewId = req.params.reviewId;
         const updatedReview = req.body;
         const bookId = req.params.bookId;
+        const newRating = updatedReview.rating;
+        let oldRating = 0;
 
-        reviewsRepo.changeTotalRating(reviewId, updatedReview.rating, bookId)
+        reviewsRepo.getRating(reviewId)
+        .then((val) => oldRating = val[0][0][0]['rating'])
+        .then(() => reviewsRepo.changeTotalRating(reviewId, oldRating, newRating, bookId))
         .then(() => reviewsRepo.updateAverageRating(bookId))
         .then(() => reviewsRepo.editReview(reviewId, updatedReview))
         .then(() => {
@@ -92,9 +105,8 @@ const controller = {
         const reviewId = req.params.reviewId;
         const bookId = req.params.bookId;
 
-        reviewsHelperController.deleteReviewSubprocesses(reviewId, bookId)
+        deleteReviewSubprocesses(reviewId, bookId)
         .then(() => {
-            console.log("deleted comments too");
             responsesController.sendData(res, 200, {message: "Successfully deleted review."});
         })
         .catch((err) => {
@@ -110,7 +122,7 @@ const controller = {
             reviewId = reviews[i]['id'];
             bookId = reviews[i]['bookId'];
 
-            reviewsHelperController.deleteReviewSubprocesses(reviewId, bookId);
+            deleteReviewSubprocesses(reviewId, bookId);
         }
     }
 };

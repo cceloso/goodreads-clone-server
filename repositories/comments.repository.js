@@ -3,13 +3,11 @@ const redis = require('./redis');
 
 const usersRepo = {
     getComment: (commentId) => {
-        return knex.raw("CALL getComment(?)", [commentId])
-        .finally(() => knex.destroy);
+        return knex.raw("CALL getComment(?)", [commentId]);
     },
     
     getComments: (reviewId) => {
-        return knex.raw("CALL getComments(?)", [reviewId])
-        .finally(() => knex.destroy);
+        return knex.raw("CALL getComments(?)", [reviewId]);
     },
 
     addComment: (newComment, bookId, reviewId, userId, userName) => {
@@ -28,7 +26,7 @@ const usersRepo = {
             };
 
             redis.hmset(`comments:${commentObject.id}`, redisObject);
-        })
+        });
     },
 
     editComment: (commentId, updatedComment) => {
@@ -39,7 +37,7 @@ const usersRepo = {
             } else {
                 redis.hset(`comments:${commentId}`, "comment", updatedComment.comment);
             }
-        })
+        });
     },
 
     deleteComment: (commentId) => {
@@ -50,7 +48,7 @@ const usersRepo = {
             } else {
                 redis.del(`comments:${commentId}`);
             }
-        })
+        });
     },
 
     deleteCommentsByBook: (bookId) => {

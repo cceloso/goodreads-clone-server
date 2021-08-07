@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const passport = require('passport');
 
 const booksController = require('../controllers/books.controller');
 const commentsController = require('../controllers/comments.controller');
@@ -40,6 +41,7 @@ router.get('/?genre=:genreId', booksController.getBooks);
 router.get('/:bookId/reviews/:reviewId', reviewsController.getReview);
 router.get('/:bookId/reviews', reviewsController.getReviews);
 router.post('/:bookId/reviews', reviewsController.postReview);
+// router.post('/:bookId/reviews', passport.authenticate('jwt', { session: false }), reviewsController.postReview);
 
 /* Edit review */
 router.put('/:bookId/reviews/:reviewId', reviewsController.putReview);

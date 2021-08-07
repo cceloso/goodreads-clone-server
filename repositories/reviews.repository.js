@@ -67,20 +67,34 @@ const reviewsRepo = {
         return knex.raw("CALL deleteReviewsByUser(?)", [userId]);
     },
 
-    changeTotalRating: (reviewId, rating, bookId) => {
-        return knex.raw("CALL changeTotalRating(?, ?, ?)", [reviewId, rating, bookId]);
+    getRating: (reviewId) => {
+        return knex.raw("CALL getRating(?)", [reviewId]);
+    },
+
+    changeTotalRating: (reviewId, oldRating, newRating, bookId) => {
+        return knex.raw("CALL changeTotalRating(?, ?, ?, ?)", [reviewId, oldRating, newRating, bookId])
+        .then(() => redis.hincrby(`books:${bookId}`, "totalRating", -oldRating))
+        .then(() => redis.hincrby(`books:${bookId}`, "totalRating", newRating));
     },
 
     increaseTotalRating: (rating, bookId) => {
-        return knex.raw("CALL increaseTotalRating(?, ?)", [rating, bookId]);
+        return knex.raw("CALL increaseTotalRating(?, ?)", [rating, bookId])
+        .then(() => redis.hincrby(`books:${bookId}`, "totalRating", rating))
+        .then(() => redis.hincrby(`books:${bookId}`, "ratingCtr", 1));
     },
 
-    decreaseTotalRating: (reviewId, bookId) => {
-        return knex.raw("CALL decreaseTotalRating(?, ?)", [reviewId, bookId]);
+    decreaseTotalRating: (reviewId, rating, bookId) => {
+        return knex.raw("CALL decreaseTotalRating(?, ?, ?)", [reviewId, rating, bookId])
+        .then(() => redis.hincrby(`books:${bookId}`, "totalRating", -rating))
+        .then(() => redis.hincrby(`books:${bookId}`, "ratingCtr", -1));
     },
 
     updateAverageRating: (bookId) => {
-        return knex.raw("CALL updateAverageRating(?)", [bookId]);
+        let averageRating = 0;
+
+        return knex.raw("CALL updateAverageRating(?)", [bookId])
+        .then((val) => averageRating = val[0][0][0]['averageRating'])
+        .then(() => redis.hset(`books:${bookId}`, "averageRating", averageRating));
     }
 };
 

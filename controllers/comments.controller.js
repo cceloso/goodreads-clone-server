@@ -37,7 +37,6 @@ const controller = {
             responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
         }
 
-        console.log("inside postComment in controller");
         const bookId = req.params.bookId;
         const reviewId = req.params.reviewId;
         const queryObject = url.parse(req.url, true).query;
@@ -66,10 +65,6 @@ const controller = {
         const query = req.url.split('?')[1];
         const urlParams = new URLSearchParams(query);
         const userId = urlParams.get("userId");
-        console.log(`bookId: ${bookId}`);
-        console.log(`reviewId: ${reviewId}`);
-        console.log(`commentId: ${commentId}`);
-        console.log(`userId: ${userId}`);
 
         commentsRepo.editComment(commentId, req.body)
         .then(() => {

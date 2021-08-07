@@ -8,15 +8,13 @@ const usersRepo = {
     },
 
     getAllUsers: () => {
-        return knex.raw("CALL getAllUsers()")
-        .finally(() => knex.destroy);
+        return knex.raw("CALL getAllUsers()");
     },
 
     getUserById: (userId) => {
-        console.log("inside getUserById");
-        console.log("userId:", userId);
-        return knex.raw("CALL getUserById(?)", [userId])
-        .finally(() => knex.destroy);
+        // console.log("inside getUserById");
+        // console.log("userId:", userId);
+        return knex.raw("CALL getUserById(?)", [userId]);
     },
 
     loginUser: (user) => {

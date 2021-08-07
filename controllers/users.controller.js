@@ -43,7 +43,6 @@ const controller = {
             if(err.code === "ER_DUP_ENTRY") {
                 const dupEntryMessage = err.sqlMessage.split(' ');
                 const dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
-                console.log("dupEntryKey:", dupEntryKey);
                 
                 if(dupEntryKey == "'userName'") {
                     responsesController.sendError(res, 409, "Username already taken", "DUPLICATE_ENTRY");
@@ -91,6 +90,7 @@ const controller = {
         usersRepo.loginUser(req.body)
         .then((userObject) => {
             const tokenObject = issueJWT(userObject);
+            console.log("tokenObject:", tokenObject);
 
             responsesController.sendData(res, 200, {
                 success: true,
