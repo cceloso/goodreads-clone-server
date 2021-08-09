@@ -7,6 +7,27 @@ const reviewsRepo = require('../repositories/reviews.repository');
 
 const url = require('url');
 
+const searchBooks = (res, searchParam) => {
+    // Add percent symbols on both ends to check for substrings
+    searchParam = `%${searchParam}%`;
+
+    booksRepo.searchBooksByTitleOrAuthor(searchParam)
+    .then((val) => responsesController.sendData(res, 200, val[0][0]))
+    .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
+};
+
+const getBooksByGenre = (res, genre) => {
+    genresRepo.getGenre(genre)
+    .then((val) => {
+        if(val[0][0].length == 0) {
+            responsesController.sendError(res, 404, "Genre not found.", "NOT_FOUND");
+        }
+    })
+    .then(() => booksRepo.getBooksByGenre(genre))
+    .then((val) => responsesController.sendData(res, 200, val[0][0]))
+    .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
+};
+
 const controller = {
     getBook: (req, res) => {
         booksRepo.getBook(req.params.bookId)
@@ -17,34 +38,22 @@ const controller = {
                 responsesController.sendData(res, 200, val);
             }
         })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        })
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
     },
 
     getBooks: (req, res) => {
         const queryObject = url.parse(req.url, true).query;
         const genre = queryObject.genre;
+        const searchParam = queryObject.search;
 
-        if(genre == "all" || genre == undefined) {
+        if(searchParam != undefined) {
+            searchBooks(res, searchParam);
+        } else if(genre == "all" || genre == undefined) {
             booksRepo.getBooks()
-            .then((val) => {
-                let books = val[0][0];
-                responsesController.sendData(res, 200, books);
-            })
+            .then((val) => responsesController.sendData(res, 200, val[0][0]))
+            .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
         } else {
-            genresRepo.getGenre(genre)
-            .then((val) => {
-                if(val[0][0].length == 0) {
-                    console.log("genre does not exist")
-                    responsesController.sendError(res, 404, "Genre not found.", "NOT_FOUND");
-                }
-            })
-            .then(() => booksRepo.getBooksByGenre(genre))
-            .then((val) => {
-                let books = val[0][0];
-                responsesController.sendData(res, 200, books);
-            })
+            getBooksByGenre(res, genre);
         }
     },
 
@@ -54,21 +63,11 @@ const controller = {
         }
 
         booksRepo.addBook(req.body)
-        .then(() => {
-            responsesController.sendData(res, 201, {message: "Successfully added a book."});
-        })
+        .then(() => responsesController.sendData(res, 201, {message: "Successfully added a book."}))
         .catch((err) => {
             if(err.code == 'ER_DUP_ENTRY') {
-                let dupEntryMessage = err.sqlMessage.split(' ');
-                let dupEntryKey = dupEntryMessage[dupEntryMessage.length - 1];
-                errorCode = 409;
-
-                if(dupEntryKey == `'titleAndAuthor'`) {
-                    responsesController.sendError(res, 409, "Book with that title and author already exists.", "DUPLICATE_ENTRY");
-                }
-            }
-
-            else {
+                responsesController.sendError(res, 409, "Book with that title and author already exists.", "DUPLICATE_ENTRY");
+            } else {
                 responsesController.sendError(res, 400, err, "BAD_REQUEST");
             }
         })
@@ -80,12 +79,8 @@ const controller = {
         }
 
         booksRepo.editBook(req.params.bookId, req.body)
-        .then(() => {
-            responsesController.sendData(res, 201, {message: "Successfully edited book."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 404, err, "BAD_REQUEST");
-        })
+        .then(() => responsesController.sendData(res, 201, {message: "Successfully edited book."}))
+        .catch((err) => responsesController.sendError(res, 404, err, "BAD_REQUEST"))
     },
 
     deleteBook: (req, res) => {
@@ -94,12 +89,8 @@ const controller = {
         commentsRepo.deleteCommentsByBook(bookId)
         .then(() => reviewsRepo.deleteReviewsByBook(bookId))
         .then(() => booksRepo.deleteBook(bookId))
-        .then(() => {
-            responsesController.sendData(res, 200, {message: "Successfully deleted book."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 404, err, "BAD_REQUEST");
-        })
+        .then(() => responsesController.sendData(res, 200, {message: "Successfully deleted book."}))
+        .catch((err) => responsesController.sendError(res, 404, err, "BAD_REQUEST"))
     }
 };
 

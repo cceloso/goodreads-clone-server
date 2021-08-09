@@ -99,7 +99,11 @@ const controller = {
             });
         })
         .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
+            if(err == "Invalid user." || err == "Invalid password.") {
+                responsesController.sendError(res, 401, err, "UNAUTHORIZED");
+            } else {
+                responsesController.sendError(res, 400, err, "BAD_REQUEST");
+            }
         });
     }
 };

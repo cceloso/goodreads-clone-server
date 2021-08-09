@@ -28,7 +28,7 @@ const usersRepo = {
                     userObject = val[0][0][0];
                     correctPassword = userObject.password;
                 } else {
-                    reject("Invalid user.");
+                    reject("Invalid user");
                 }
                 console.log("correctPassword:", correctPassword);
             })
@@ -38,7 +38,7 @@ const usersRepo = {
                     resolve(userObject);
                 } else {
                     console.log("password is incorrect");
-                    reject("Invalid password.");
+                    reject("Invalid password");
                 }
             });
         });

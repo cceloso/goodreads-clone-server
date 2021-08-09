@@ -6,6 +6,11 @@ const reviewsRepo = {
         return redis.hgetall(`reviews:${reviewId}`);
     },
 
+    getReviewByUserAndBook: (userId, bookId) => {
+        console.log("inside getReviewByUserAndBook");
+        return knex.raw("CALL getReviewByUserAndBook(?, ?)", [userId, bookId]);
+    },
+
     getReviews: (bookId) => {
         return knex.raw("CALL getReviews(?)", [bookId]);
     },

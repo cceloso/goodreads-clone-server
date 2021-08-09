@@ -3,7 +3,6 @@ const redis = require('./redis');
 
 const addOrEditBookOnRedis = (bookObject) => {
     const genresStr = JSON.parse(bookObject.genres).join(',');
-    // console.log("genres:", genres);
 
     const redisObject = {
         id: bookObject.id,
@@ -32,9 +31,16 @@ const booksRepo = {
         return knex.raw("CALL getBooks()");
     },
 
+    getBooksByAuthor: (author) => {
+        return knex.raw("CALL getBooksByAuthor(?)", [author]);
+    },
+
     getBooksByGenre: (genreId) => {
-        return knex.raw("CALL getBooksByGenre(?)", [JSON.stringify(genreId)])
-        .finally(() => knex.destroy);
+        return knex.raw("CALL getBooksByGenre(?)", [JSON.stringify(genreId)]);
+    },
+
+    searchBooksByTitleOrAuthor: (searchParam) => {
+        return knex.raw("CALL searchBooksByTitleOrAuthor(?)", [searchParam]);
     },
 
     addBook: (newBook) => {
