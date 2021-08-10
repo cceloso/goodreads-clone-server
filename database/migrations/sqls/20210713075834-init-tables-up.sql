@@ -546,11 +546,12 @@ CREATE INDEX idx_dateCreated ON `replies` (`dateCreated`);
 CREATE INDEX idx_lastUpdated ON `replies` (`lastUpdated`);
 
 CREATE PROCEDURE `getReply`(
-	IN `p_id` INT
+	IN `p_replyId` INT,
+	IN `p_topicId` INT
 )
 BEGIN
 	SELECT *  FROM `replies`
-    WHERE `id` = `p_id`;
+    WHERE `id` = `p_replyId` AND `topicId` = `p_topicId` ;
 END;
 
 CREATE PROCEDURE `getReplies`(
@@ -579,21 +580,25 @@ END;
 
 CREATE PROCEDURE `putReply`(
     IN `p_id` INT,
-    IN `p_content` TEXT
+    IN `p_content` TEXT,
+    IN `p_topicId` INT
 )
 BEGIN
     UPDATE `replies`
     SET `content` = `p_content`
-    WHERE `id` = `p_id`;
+    WHERE `id` = `p_id` AND `topicId` = `p_topicId`;
 END;
 
 CREATE PROCEDURE `deleteReply`(
-    IN `p_id` INT
+    IN `p_id` INT,
+    IN `p_topicId` INT
 )
 BEGIN
     DELETE FROM `replies`
-    WHERE `id` = `p_id`;
+    WHERE `id` = `p_id` AND `topicId` = `p_topicId`;
 END;
+
+-- FORUM TOPIC AND REPLY
 
 CREATE PROCEDURE `increaseReplyCtr`(
     IN `p_topicId` INT

@@ -16,20 +16,13 @@ const controller = {
                 responsesController.sendData(res, 200, comment);
             }
         })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        });
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
     },
 
     getComments: (req, res) => {
         commentsRepo.getComments(req.params.reviewId)
-        .then((val) => {
-            let comments = val[0][0];
-            responsesController.sendData(res, 200, comments);
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        });
+        .then((val) => responsesController.sendData(res, 200, val[0][0]))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
     },
 
     postComment: (req, res) => {
@@ -46,12 +39,8 @@ const controller = {
         usersRepo.getUserById(userId)
         .then((val) => userName = val[0][0][0]['userName'])
         .then(() => commentsRepo.addComment(req.body, bookId, reviewId, userId, userName))
-        .then(() => {
-            responsesController.sendData(res, 201, {message: "Successfully added a comment."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        })
+        .then(() => responsesController.sendData(res, 201, {message: "Successfully added a comment."}))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
     },
 
     putComment: (req, res) => {
@@ -67,12 +56,8 @@ const controller = {
         const userId = urlParams.get("userId");
 
         commentsRepo.editComment(commentId, req.body)
-        .then(() => {
-            responsesController.sendData(res, 200, {message: "Successfully edited comment."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        })
+        .then(() => responsesController.sendData(res, 200, {message: "Successfully edited comment."}))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
     },
 
     deleteComment: (req, res) => {
@@ -84,12 +69,8 @@ const controller = {
         const userId = urlParams.get("userId");
 
         commentsRepo.deleteComment(commentId)
-        .then(() => {
-            responsesController.sendData(res, 200, {message: "Successfully deleted comment."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        })
+        .then(() => responsesController.sendData(res, 200, {message: "Successfully deleted comment."}))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
     }
 };
 
