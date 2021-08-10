@@ -12,18 +12,6 @@ CREATE TABLE `users` (
     `role` VARCHAR(255) NOT NULL
 );
 
--- CREATE TABLE `users_not_indexed` (
---     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
---     `firstName` VARCHAR(255) NOT NULL,
---     `lastName` VARCHAR(255) NOT NULL,
---     `userName` VARCHAR(255) UNIQUE NOT NULL,
---     `email` VARCHAR(255) UNIQUE NOT NULL,
---     `password` CHAR(60) NOT NULL,
---     `dateCreated` TIMESTAMP NOT NULL,
---     `imageUrl` VARCHAR(255) NOT NULL,
---     `role` VARCHAR(255) NOT NULL
--- );
-
 CREATE INDEX idx_userName ON `users` (`userName`);
 CREATE INDEX idx_userName_email ON `users` (`userName`, `email`);
 
@@ -56,9 +44,6 @@ CREATE PROCEDURE `postUser`(
 BEGIN
 	INSERT INTO `users` (`firstName`, `lastName`, `userName`, `email`, `password`, `dateCreated`, `imageUrl`, `role`)
     VALUES (`p_firstName`, `p_lastName`, `p_userName`, `p_email`, `p_password`, NOW(), `p_imageUrl`, `p_role`);
-	
-    -- INSERT INTO `users_not_indexed` (`firstName`, `lastName`, `userName`, `email`, `password`, `dateCreated`, `imageUrl`, `role`)
-    -- VALUES (`p_firstName`, `p_lastName`, `p_userName`, `p_email`, `p_password`, NOW(), `p_imageUrl`, `p_role`);
 
     SELECT * FROM `users`
     WHERE `userName` = `p_userName`;
@@ -94,22 +79,6 @@ END;
 -- BOOKS
 
 CREATE TABLE `books` (
-    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `title` VARCHAR(255) NOT NULL,
-    `author` VARCHAR(255) NOT NULL,
-    `isbn` VARCHAR(255) NOT NULL,
-    `publisher` VARCHAR(255) NOT NULL,
-    `published` VARCHAR(4) NOT NULL,
-    `description` TEXT NOT NULL,
-    `genres` JSON NOT NULL,
-    `imageUrl` VARCHAR(255) NOT NULL,
-    `totalRating` FLOAT(10, 2) NOT NULL,
-    `averageRating` FLOAT(3, 2) NOT NULL,
-    `ratingCtr` INT NOT NULL,
-    CONSTRAINT `titleAndAuthor` UNIQUE(`title`, `author`)
-);
-
-CREATE TABLE `books_not_indexed` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
     `author` VARCHAR(255) NOT NULL,
@@ -181,9 +150,6 @@ CREATE PROCEDURE `postBook`(
 )
 BEGIN
 	INSERT INTO `books` (`title`, `author`, `isbn`, `publisher`, `published`, `description`, `genres`, `imageUrl`, `totalRating`, `averageRating`, `ratingCtr`)
-    VALUES (`p_title`, `p_author`, `p_isbn`, `p_publisher`, `p_published`, `p_description`, `p_genres`, `p_imageUrl`, 0, 0, 0);
-
-    INSERT INTO `books_not_indexed` (`title`, `author`, `isbn`, `publisher`, `published`, `description`, `genres`, `imageUrl`, `totalRating`, `averageRating`, `ratingCtr`)
     VALUES (`p_title`, `p_author`, `p_isbn`, `p_publisher`, `p_published`, `p_description`, `p_genres`, `p_imageUrl`, 0, 0, 0);
 
     SELECT * FROM `books`
@@ -261,19 +227,9 @@ CREATE TABLE `reviews` (
     CONSTRAINT `bookAndUser` UNIQUE(`bookId`, `userId`)
 );
 
--- CREATE TABLE `reviews_not_indexed` (
---     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
---     `rating` FLOAT(3, 2) NOT NULL,
---     `review` TEXT NOT NULL,
---     `dateCreated` DATE NOT NULL,
---     `bookId` INT NOT NULL,
---     `userId` INT NOT NULL,
---     `userName` VARCHAR(255) NOT NULL,
---     CONSTRAINT `bookAndUser` UNIQUE(`bookId`, `userId`)
--- );
-
 CREATE INDEX idx_bookId ON `reviews` (`bookId`);
 CREATE INDEX idx_userId ON `reviews` (`userId`);
+CREATE INDEX idx_dateCreated ON `reviews` (`dateCreated`);
 CREATE INDEX idx_bookId_userId ON `reviews` (`bookId`, `userId`);
 
 CREATE PROCEDURE `getReviews`(
@@ -281,7 +237,8 @@ CREATE PROCEDURE `getReviews`(
 )
 BEGIN
 	SELECT *  FROM `reviews`
-    WHERE `bookId` = `p_bookId`;
+    WHERE `bookId` = `p_bookId`
+    ORDER BY `dateCreated` DESC;
 END;
 
 CREATE PROCEDURE `getReviewByUserAndBook`(
@@ -298,7 +255,8 @@ CREATE PROCEDURE `getReviewsByUser`(
 )
 BEGIN
 	SELECT *  FROM `reviews`
-    WHERE `userId` = `p_userId`;
+    WHERE `userId` = `p_userId`
+    ORDER BY `dateCreated` DESC;
 END;
 
 CREATE PROCEDURE `postReview`(
@@ -311,9 +269,6 @@ CREATE PROCEDURE `postReview`(
 BEGIN
 	INSERT INTO `reviews` (`rating`, `review`, `dateCreated`, `bookId`, `userId`, `userName`)
     VALUES (`p_rating`, `p_review`, CURDATE(), `p_bookId`, `p_userId`, `p_userName`);
-
-	-- INSERT INTO `reviews_not_indexed` (`rating`, `review`, `dateCreated`, `bookId`, `userId`, `userName`)
-    -- VALUES (`p_rating`, `p_review`, CURDATE(), `p_bookId`, `p_userId`, `p_userName`);
 
     SELECT * FROM `reviews`
     WHERE `bookId` = `p_bookId` AND `userId` = `p_userId`;
@@ -431,16 +386,6 @@ CREATE TABLE `comments` (
     `userName` VARCHAR(255) NOT NULL
 );
 
--- CREATE TABLE `comments_not_indexed` (
---     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
---     `comment` TEXT NOT NULL,
---     `dateCreated` TIMESTAMP NOT NULL,
---     `bookId` INT NOT NULL,
---     `reviewId` INT NOT NULL,
---     `userId` INT NOT NULL,
---     `userName` VARCHAR(255) NOT NULL
--- );
-
 CREATE INDEX idx_reviewId ON `comments` (`reviewId`);
 
 CREATE PROCEDURE `getComment`(
@@ -456,7 +401,8 @@ CREATE PROCEDURE `getComments`(
 )
 BEGIN
 	SELECT *  FROM `comments`
-    WHERE `reviewId` = `p_reviewId`;
+    WHERE `reviewId` = `p_reviewId`
+    ORDER BY `dateCreated`;
 END;
 
 CREATE PROCEDURE `postComment`(
@@ -469,9 +415,6 @@ CREATE PROCEDURE `postComment`(
 BEGIN
     INSERT INTO `comments` (`comment`, `dateCreated`, `bookId`, `reviewId`, `userId`, `userName`)
     VALUES (`p_comment`, NOW(), `p_bookId`, `p_reviewId`, `p_userId`, `p_userName`);
-
-    -- INSERT INTO `comments_not_indexed` (`comment`, `dateCreated`, `bookId`, `reviewId`, `userId`, `userName`)
-    -- VALUES (`p_comment`, NOW(), `p_bookId`, `p_reviewId`, `p_userId`, `p_userName`);
 
     SELECT * FROM `comments` WHERE `id` = (
         SELECT MAX(`id`) FROM `comments`
