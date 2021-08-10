@@ -7,7 +7,7 @@ CREATE TABLE `users` (
     `userName` VARCHAR(255) UNIQUE NOT NULL,
     `email` VARCHAR(255) UNIQUE NOT NULL,
     `password` CHAR(60) NOT NULL,
-    `dateCreated` TIMESTAMP NOT NULL,
+    `dateCreated` DATETIME NOT NULL,
     `imageUrl` VARCHAR(255) NOT NULL,
     `role` VARCHAR(255) NOT NULL
 );
@@ -379,7 +379,7 @@ END;
 CREATE TABLE `comments` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `comment` TEXT NOT NULL,
-    `dateCreated` TIMESTAMP NOT NULL,
+    `dateCreated` DATETIME NOT NULL,
     `bookId` INT NOT NULL,
     `reviewId` INT NOT NULL,
     `userId` INT NOT NULL,
@@ -387,6 +387,7 @@ CREATE TABLE `comments` (
 );
 
 CREATE INDEX idx_reviewId ON `comments` (`reviewId`);
+CREATE INDEX idx_dateCreated ON `comments` (`dateCreated`);
 
 CREATE PROCEDURE `getComment`(
 	IN `p_id` INT
@@ -461,6 +462,155 @@ CREATE PROCEDURE `deleteCommentsByUser`(
 BEGIN
     DELETE FROM `comments`
     WHERE `userId` = `p_userId`;
+END;
+
+
+-- FORUM TOPICS
+
+CREATE TABLE `topics` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `title` TEXT NOT NULL,
+    `content` TEXT NOT NULL,
+    `dateCreated` DATETIME NOT NULL,
+    `lastUpdated` TIMESTAMP NOT NULL,
+    `replyCtr` INT NOT NULL,
+    `userId` INT NOT NULL,
+    `userName` VARCHAR(255) NOT NULL
+);
+
+CREATE INDEX idx_dateCreated ON `topics` (`dateCreated`);
+CREATE INDEX idx_lastUpdated ON `topics` (`lastUpdated`);
+
+CREATE PROCEDURE `getTopic`(
+	IN `p_id` INT
+)
+BEGIN
+	SELECT *  FROM `topics`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `getTopics`()
+BEGIN
+	SELECT *  FROM `topics`
+    ORDER BY `dateCreated` DESC;
+END;
+
+CREATE PROCEDURE `postTopic`(
+    IN `p_title` TEXT,
+    IN `p_content` TEXT,
+    IN `p_userId` INT,
+    IN `p_userName` VARCHAR(255)
+)
+BEGIN
+    INSERT INTO `topics` (`title`, `content`, `dateCreated`, `replyCtr`, `userId`, `userName`)
+    VALUES (`p_title`, `p_content`, NOW(), 0, `p_userId`, `p_userName`);
+
+    SELECT * FROM `topics` WHERE `id` = (
+        SELECT MAX(`id`) FROM `topics`
+    );
+END;
+
+CREATE PROCEDURE `putTopic`(
+    IN `p_id` INT,
+    IN `p_title` TEXT,
+    IN `p_content` TEXT
+)
+BEGIN
+    UPDATE `topics`
+    SET `title` = `p_title`, `content` = `p_content`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `deleteTopic`(
+    IN `p_id` INT
+)
+BEGIN
+    DELETE FROM `topics`
+    WHERE `id` = `p_id`;
+END;
+
+
+-- FORUM REPLIES
+
+CREATE TABLE `replies` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `content` TEXT NOT NULL,
+    `dateCreated` DATETIME NOT NULL,
+    `lastUpdated` TIMESTAMP NOT NULL,
+    `topicId` INT NOT NULL,
+    `userId` INT NOT NULL,
+    `userName` VARCHAR(255) NOT NULL
+);
+
+CREATE INDEX idx_dateCreated ON `replies` (`dateCreated`);
+CREATE INDEX idx_lastUpdated ON `replies` (`lastUpdated`);
+
+CREATE PROCEDURE `getReply`(
+	IN `p_id` INT
+)
+BEGIN
+	SELECT *  FROM `replies`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `getReplies`(
+    IN `p_topicId` INT
+)
+BEGIN
+	SELECT *  FROM `replies`
+    WHERE `topicId` = `p_topicId`
+    ORDER BY `dateCreated`;
+END;
+
+CREATE PROCEDURE `postReply`(
+    IN `p_content` TEXT,
+    IN `p_topicId` INT,
+    IN `p_userId` INT,
+    IN `p_userName` VARCHAR(255)
+)
+BEGIN
+    INSERT INTO `replies` (`content`, `dateCreated`, `lastUpdated`, `topicId`, `userId`, `userName`)
+    VALUES (`p_content`, NOW(), NOW(), `p_topicId`, `p_userId`, `p_userName`);
+
+    SELECT * FROM `replies` WHERE `id` = (
+        SELECT MAX(`id`) FROM `replies`
+    );
+END;
+
+CREATE PROCEDURE `putReply`(
+    IN `p_id` INT,
+    IN `p_content` TEXT
+)
+BEGIN
+    UPDATE `replies`
+    SET `content` = `p_content`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `deleteReply`(
+    IN `p_id` INT
+)
+BEGIN
+    DELETE FROM `replies`
+    WHERE `id` = `p_id`;
+END;
+
+CREATE PROCEDURE `increaseReplyCtr`(
+    IN `p_topicId` INT
+)
+BEGIN
+    UPDATE `topics`
+    SET `replyCtr` = `replyCtr` + 1
+    WHERE `id` = `p_topicId`;
+END;
+
+CREATE PROCEDURE `decreaseReplyCtr`(
+    IN `p_topicId` INT
+)
+BEGIN
+    UPDATE `topics`
+    SET `replyCtr` = `replyCtr` - 1
+    WHERE `id` = `p_topicId`;
 END;
 
 
