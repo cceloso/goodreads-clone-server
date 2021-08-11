@@ -45,20 +45,22 @@ io.on("connection", socket => {
   };
 
   socket.on("joinForum", (topicId) => {
-    topics[topicId] = topicId;
     safeJoin(topicId);
   });
 
-  socket.on("reply", (replyObject, topicId) => {
+  socket.on("sendReply", (replyObject, topicId) => {
     // console.log("New reply!");
     // console.log(`id: ${replyObject.id}`);
     // console.log(`content: ${replyObject.content}`);
     // console.log(`userName: ${replyObject.userName}`);
-    io.to(topicId).emit("reply", replyObject);
+    // safeJoin(topicId);
+    io.to(topicId).emit("newReply", replyObject);
   });
 
-  io.emit("documents", Object.keys(documents));
-
+  socket.on("sendTopic", (topicObject) => {
+    io.emit("newTopic", topicObject);
+  });
+  
   console.log(`Socket ${socket.id} has connected`);
 });
 

@@ -54,12 +54,8 @@ const controller = {
         usersRepo.getUserById(userId)
         .then((val) => userName = val[0][0][0]['userName'])
         .then(() => topicsRepo.addTopic(req.body, userId, userName))
-        .then(() => {
-            responsesController.sendData(res, 201, {message: "Successfully added a forum topic."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        })
+        .then((val) => responsesController.sendData(res, 201, val[0][0][0]))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
     },
 
     putTopic: (req, res) => {
