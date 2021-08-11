@@ -9,13 +9,17 @@ const topicsRepo = {
         return knex.raw("CALL getTopics()");
     },
 
+    searchTopics: (searchParam) => {
+        return knex.raw("CALL searchTopics(?)", [searchParam]);
+    },
+
     addTopic: (newTopic, userId, userName) => {
-        return knex.raw("CALL postTopic(?, ?, ?, ?)", [newTopic.title, newTopic.content, userId, userName]);
+        return knex.raw("CALL postTopic(?, ?, ?, ?, ?)", [newTopic.title, newTopic.content, newTopic.flair, userId, userName]);
     },
 
     editTopic: (topicId, updatedTopic) => {
         console.log("inside editTopic in topics repo");
-        return knex.raw("CALL putTopic(?, ?, ?)", [topicId, updatedTopic.title, updatedTopic.content]);
+        return knex.raw("CALL putTopic(?, ?, ?, ?)", [topicId, updatedTopic.title, updatedTopic.content, updatedTopic.flair]);
     },
 
     deleteTopic: (topicId) => {

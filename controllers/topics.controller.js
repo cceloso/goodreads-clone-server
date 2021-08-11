@@ -5,6 +5,14 @@ const usersRepo = require('../repositories/users.repository');
 
 const url = require('url');
 
+const searchTopics = (res, searchParam) => {
+    searchParam = `${searchParam}%`;
+
+    topicsRepo.searchTopics(searchParam)
+    .then((val) => responsesController.sendData(res, 200, val[0][0]))
+    .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
+};
+
 const controller = {
     getTopic: (req, res) => {
         topicsRepo.getTopic(req.params.topicId)
@@ -22,14 +30,16 @@ const controller = {
     },
 
     getTopics: (req, res) => {
-        topicsRepo.getTopics()
-        .then((val) => {
-            let topics = val[0][0];
-            responsesController.sendData(res, 200, topics);
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        });
+        const queryObject = url.parse(req.url, true).query;
+        const searchParam = queryObject.search;
+
+        if(searchParam != undefined) {
+            searchTopics(res, searchParam);
+        } else {
+            topicsRepo.getTopics()
+            .then((val) => responsesController.sendData(res, 200, val[0][0]))
+            .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
+        }
     },
 
     postTopic: (req, res) => {

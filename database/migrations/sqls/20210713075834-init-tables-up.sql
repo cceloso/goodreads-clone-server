@@ -471,6 +471,7 @@ CREATE TABLE `topics` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `title` TEXT NOT NULL,
     `content` TEXT NOT NULL,
+    `flair` VARCHAR(255),
     `dateCreated` DATETIME NOT NULL,
     `lastUpdated` TIMESTAMP NOT NULL,
     `replyCtr` INT NOT NULL,
@@ -479,7 +480,8 @@ CREATE TABLE `topics` (
 );
 
 CREATE INDEX idx_dateCreated ON `topics` (`dateCreated`);
-CREATE INDEX idx_lastUpdated ON `topics` (`lastUpdated`);
+-- CREATE INDEX idx_title_dateCreated ON `topics` (`title`, `dateCreated`);
+-- CREATE INDEX idx_lastUpdated ON `topics` (`lastUpdated`);
 
 CREATE PROCEDURE `getTopic`(
 	IN `p_id` INT
@@ -495,15 +497,25 @@ BEGIN
     ORDER BY `dateCreated` DESC;
 END;
 
+CREATE PROCEDURE `searchTopics`(
+    IN `p_searchParam` VARCHAR(255)
+)
+BEGIN
+	SELECT *  FROM `topics`
+    WHERE `title` LIKE `p_searchParam`
+    ORDER BY `dateCreated` DESC, `title`;
+END;
+
 CREATE PROCEDURE `postTopic`(
     IN `p_title` TEXT,
     IN `p_content` TEXT,
+    IN `p_flair` VARCHAR(255),
     IN `p_userId` INT,
     IN `p_userName` VARCHAR(255)
 )
 BEGIN
-    INSERT INTO `topics` (`title`, `content`, `dateCreated`, `replyCtr`, `userId`, `userName`)
-    VALUES (`p_title`, `p_content`, NOW(), 0, `p_userId`, `p_userName`);
+    INSERT INTO `topics` (`title`, `content`, `flair`, `dateCreated`, `replyCtr`, `userId`, `userName`)
+    VALUES (`p_title`, `p_content`, `p_flair`, NOW(), 0, `p_userId`, `p_userName`);
 
     SELECT * FROM `topics` WHERE `id` = (
         SELECT MAX(`id`) FROM `topics`
@@ -513,11 +525,12 @@ END;
 CREATE PROCEDURE `putTopic`(
     IN `p_id` INT,
     IN `p_title` TEXT,
-    IN `p_content` TEXT
+    IN `p_content` TEXT,
+    IN `p_flair` VARCHAR(255)
 )
 BEGIN
     UPDATE `topics`
-    SET `title` = `p_title`, `content` = `p_content`
+    SET `title` = `p_title`, `content` = `p_content`, `flair` = `p_flair`
     WHERE `id` = `p_id`;
 END;
 
