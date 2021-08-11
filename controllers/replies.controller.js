@@ -43,14 +43,10 @@ const controller = {
 
         usersRepo.getUserById(userId)
         .then((val) => userName = val[0][0][0]['userName'])
-        .then(() => repliesRepo.addReply(req.body.content, topicId, userId, userName))
         .then(() => topicsRepo.increaseReplyCtr(topicId))
-        .then(() => {
-            responsesController.sendData(res, 201, {message: "Successfully added a reply."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        })
+        .then(() => repliesRepo.addReply(req.body.content, topicId, userId, userName))
+        .then((val) => responsesController.sendData(res, 201, val[0][0][0]))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
     },
 
     putReply: (req, res) => {
