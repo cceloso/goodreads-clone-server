@@ -53,14 +53,17 @@ io.on("connection", socket => {
     // console.log(`id: ${replyObject.id}`);
     // console.log(`content: ${replyObject.content}`);
     // console.log(`userName: ${replyObject.userName}`);
-    // safeJoin(topicId);
     io.to(topicId).emit("newReply", replyObject);
   });
 
   socket.on("sendTopic", (topicObject) => {
     io.emit("newTopic", topicObject);
   });
-  
+
+  socket.on("updateNavbar", () => {
+    io.emit("newUserState");
+  });
+
   console.log(`Socket ${socket.id} has connected`);
 });
 
