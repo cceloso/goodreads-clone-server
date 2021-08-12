@@ -9,7 +9,7 @@ const url = require('url');
 
 const searchBooks = (res, searchParam) => {
     // Add percent symbols on both ends to check for substrings
-    searchParam = `%${searchParam}%`;
+    searchParam = `${searchParam}%`;
 
     booksRepo.searchBooksByTitleOrAuthor(searchParam)
     .then((val) => responsesController.sendData(res, 200, val[0][0]))

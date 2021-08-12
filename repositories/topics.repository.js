@@ -9,6 +9,10 @@ const topicsRepo = {
         return knex.raw("CALL getTopics()");
     },
 
+    getTopicsByFlair: (flair) => {
+        return knex.raw("CALL getTopicsByFlair(?)", [flair]);
+    },
+
     searchTopics: (searchParam) => {
         return knex.raw("CALL searchTopics(?)", [searchParam]);
     },

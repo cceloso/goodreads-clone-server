@@ -497,6 +497,15 @@ BEGIN
     ORDER BY `dateCreated` DESC;
 END;
 
+CREATE PROCEDURE `getTopicsByFlair`(
+    IN `p_flair` VARCHAR(255)
+)
+BEGIN
+	SELECT *  FROM `topics`
+    WHERE `flair` = `p_flair`
+    ORDER BY `dateCreated` DESC;
+END;
+
 CREATE PROCEDURE `searchTopics`(
     IN `p_searchParam` VARCHAR(255)
 )
