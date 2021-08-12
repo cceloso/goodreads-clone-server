@@ -138,6 +138,14 @@ BEGIN
     ORDER BY `title`;
 END;
 
+CREATE PROCEDURE `getTitleAndAuthor`(
+	IN `p_id` INT
+)
+BEGIN
+	SELECT `title`, `author` FROM `books`
+    WHERE `id` = `p_id`;
+END;
+
 CREATE PROCEDURE `postBook`(
 	IN `p_title` VARCHAR(255),
     IN `p_author` VARCHAR(255),
@@ -222,6 +230,8 @@ CREATE TABLE `reviews` (
     `review` TEXT NOT NULL,
     `dateCreated` DATE NOT NULL,
     `bookId` INT NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `author` VARCHAR(255) NOT NULL,
     `userId` INT NOT NULL,
     `userName` VARCHAR(255) NOT NULL,
     CONSTRAINT `bookAndUser` UNIQUE(`bookId`, `userId`)
@@ -263,12 +273,14 @@ CREATE PROCEDURE `postReview`(
     IN `p_rating` FLOAT(3, 2),
     IN `p_review` TEXT,
     IN `p_bookId` INT,
+    IN `p_title` VARCHAR(255),
+    IN `p_author` VARCHAR(255),
     IN `p_userId` INT,
     IN `p_userName` VARCHAR(255)
 )
 BEGIN
-	INSERT INTO `reviews` (`rating`, `review`, `dateCreated`, `bookId`, `userId`, `userName`)
-    VALUES (`p_rating`, `p_review`, CURDATE(), `p_bookId`, `p_userId`, `p_userName`);
+	INSERT INTO `reviews` (`rating`, `review`, `dateCreated`, `bookId`, `title`, `author`, `userId`, `userName`)
+    VALUES (`p_rating`, `p_review`, CURDATE(), `p_bookId`, `p_title`, `p_author`, `p_userId`, `p_userName`);
 
     SELECT * FROM `reviews`
     WHERE `bookId` = `p_bookId` AND `userId` = `p_userId`;
@@ -503,6 +515,15 @@ CREATE PROCEDURE `getTopicsByFlair`(
 BEGIN
 	SELECT *  FROM `topics`
     WHERE `flair` = `p_flair`
+    ORDER BY `dateCreated` DESC;
+END;
+
+CREATE PROCEDURE `getTopicsByUser`(
+    IN `p_userId` INT
+)
+BEGIN
+	SELECT *  FROM `topics`
+    WHERE `userId` = `p_userId`
     ORDER BY `dateCreated` DESC;
 END;
 

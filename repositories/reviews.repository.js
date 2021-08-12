@@ -23,8 +23,8 @@ const reviewsRepo = {
         return knex.raw("CALL getReviewerById(?)", [reviewId]);
     },
 
-    addReview: (newReview, bookId, userId, userName) => {
-        return knex.raw("CALL postReview(?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, userId, userName])
+    addReview: (newReview, bookId, title, author, userId, userName) => {
+        return knex.raw("CALL postReview(?, ?, ?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, title, author, userId, userName])
         .then((val) => {
             const reviewObject = val[0][0][0];
             // console.log("reviewObject:", reviewObject);
@@ -35,6 +35,8 @@ const reviewsRepo = {
                 review: reviewObject.review,
                 dateCreated: reviewObject.dateCreated,
                 bookId: reviewObject.bookId,
+                title: reviewObject.title,
+                author: reviewObject.author,
                 userId: reviewObject.userId,
                 userName: reviewObject.userName
             };

@@ -12,6 +12,10 @@ const topicsRepo = {
     getTopicsByFlair: (flair) => {
         return knex.raw("CALL getTopicsByFlair(?)", [flair]);
     },
+    
+    getTopicsByUser: (userId) => {
+        return knex.raw("CALL getTopicsByUser(?)", [userId]);
+    },
 
     searchTopics: (searchParam) => {
         return knex.raw("CALL searchTopics(?)", [searchParam]);

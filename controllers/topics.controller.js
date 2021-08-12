@@ -19,6 +19,12 @@ const getTopicsByFlair = (res, flair) => {
     .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
 };
 
+const getTopicsByUser = (res, userId) => {
+    topicsRepo.getTopicsByUser(userId)
+    .then((val) => responsesController.sendData(res, 200, val[0][0]))
+    .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
+};
+
 const controller = {
     getTopic: (req, res) => {
         topicsRepo.getTopic(req.params.topicId)
@@ -39,12 +45,15 @@ const controller = {
         const queryObject = url.parse(req.url, true).query;
         const searchParam = queryObject.q;
         const flair = queryObject.flair;
+        const userId = queryObject.userId;
 
         if(searchParam != undefined) {
             searchTopics(res, searchParam);
         } else if(flair != undefined) {
             getTopicsByFlair(res, flair);
             // console.log("get topics by flair");
+        } else if(userId != undefined) {
+            getTopicsByUser(res, userId);
         } else {
             topicsRepo.getTopics()
             .then((val) => responsesController.sendData(res, 200, val[0][0]))

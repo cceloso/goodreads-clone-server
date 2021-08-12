@@ -43,6 +43,10 @@ const booksRepo = {
         return knex.raw("CALL searchBooksByTitleOrAuthor(?)", [searchParam]);
     },
 
+    getTitleAndAuthor: (bookId) => {
+        return knex.raw("CALL getTitleAndAuthor(?)", [bookId]);
+    },
+
     addBook: (newBook) => {
         return knex.raw("CALL postBook(?, ?, ?, ?, ?, ?, ?, ?)", [newBook.title, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, JSON.stringify(newBook.genres), newBook.imageUrl])
         .then((val) => {

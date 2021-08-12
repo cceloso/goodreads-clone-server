@@ -6,6 +6,7 @@ const usersRepo = require('../repositories/users.repository');
 
 const jwt = require('jsonwebtoken');
 const url = require('url');
+const booksRepo = require('../repositories/books.repository');
 
 const deleteReviewSubprocesses = (reviewId, bookId) => {
     let rating = 0;
@@ -81,9 +82,9 @@ const controller = {
         }
 
         const bookId = req.params.bookId;
-        // const queryObject = url.parse(req.url, true).query;
-        // const userId = queryObject.userId;
         let userName = "";
+        let title = "";
+        let author = "";
 
         const token = req.headers.authorization.split(' ')[1];
 
@@ -94,7 +95,13 @@ const controller = {
             
             usersRepo.getUserById(userId)
             .then((val) => userName = val[0][0][0]['userName'])
-            .then(() => reviewsRepo.addReview(req.body, bookId, userId, userName))
+            .then(() => booksRepo.getTitleAndAuthor(bookId))
+            .then((val) => {
+                let titleAndAuthor = val[0][0][0];
+                title = titleAndAuthor.title;
+                author = titleAndAuthor.author;
+            })
+            .then(() => reviewsRepo.addReview(req.body, bookId, title, author, userId, userName))
             .then(() => reviewsRepo.increaseTotalRating(req.body.rating, bookId))
             .then(() => reviewsRepo.updateAverageRating(bookId))
             .then(() => {
