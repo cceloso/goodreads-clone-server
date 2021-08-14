@@ -1,7 +1,7 @@
 const knex = require('knex')({
     client: 'mysql',
     connection: {
-        host : "db_server",
+        host : "goodreads_mysql",
         user : "root",
         password : "password",
         database : "mydb",

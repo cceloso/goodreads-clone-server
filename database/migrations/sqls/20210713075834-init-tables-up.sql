@@ -228,7 +228,7 @@ CREATE TABLE `reviews` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `rating` FLOAT(3, 2) NOT NULL,
     `review` TEXT NOT NULL,
-    `dateCreated` DATE NOT NULL,
+    `dateCreated` DATETIME NOT NULL,
     `bookId` INT NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `author` VARCHAR(255) NOT NULL,
@@ -280,7 +280,7 @@ CREATE PROCEDURE `postReview`(
 )
 BEGIN
 	INSERT INTO `reviews` (`rating`, `review`, `dateCreated`, `bookId`, `title`, `author`, `userId`, `userName`)
-    VALUES (`p_rating`, `p_review`, CURDATE(), `p_bookId`, `p_title`, `p_author`, `p_userId`, `p_userName`);
+    VALUES (`p_rating`, `p_review`, NOW(), `p_bookId`, `p_title`, `p_author`, `p_userId`, `p_userName`);
 
     SELECT * FROM `reviews`
     WHERE `bookId` = `p_bookId` AND `userId` = `p_userId`;
