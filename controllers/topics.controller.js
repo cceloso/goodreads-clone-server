@@ -83,18 +83,14 @@ const controller = {
         }
 
         topicsRepo.editTopic(req.params.topicId, req.body)
-        .then(() => {
-            responsesController.sendData(res, 200, {message: "Successfully edited topic."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        })
+        .then((val) => responsesController.sendData(res, 200, val[0][0][0]))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
     },
 
     deleteTopic: (req, res) => {
         topicsRepo.deleteTopic(req.params.topicId)
         .then(() => responsesController.sendData(res, 200, {message: "Successfully deleted topic."}))
-        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
     }
 };
 

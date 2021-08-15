@@ -16,7 +16,8 @@ const addOrEditBookOnRedis = (bookObject) => {
         imageUrl: bookObject.imageUrl,
         totalRating: bookObject.totalRating,
         averageRating: bookObject.averageRating,
-        ratingCtr: bookObject.ratingCtr
+        ratingCtr: bookObject.ratingCtr,
+        userId: bookObject.userId
     };
     
     redis.hmset(`books:${bookObject.id}`, redisObject);
@@ -47,8 +48,8 @@ const booksRepo = {
         return knex.raw("CALL getTitleAndAuthor(?)", [bookId]);
     },
 
-    addBook: (newBook) => {
-        return knex.raw("CALL postBook(?, ?, ?, ?, ?, ?, ?, ?)", [newBook.title, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, JSON.stringify(newBook.genres), newBook.imageUrl])
+    addBook: (newBook, userId) => {
+        return knex.raw("CALL postBook(?, ?, ?, ?, ?, ?, ?, ?, ?)", [newBook.title, newBook.author, newBook.isbn, newBook.publisher, newBook.published, newBook.description, JSON.stringify(newBook.genres), newBook.imageUrl, userId])
         .then((val) => {
             const bookObject = val[0][0][0];
             addOrEditBookOnRedis(bookObject);

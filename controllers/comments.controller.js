@@ -39,7 +39,7 @@ const controller = {
         usersRepo.getUserById(userId)
         .then((val) => userName = val[0][0][0]['userName'])
         .then(() => commentsRepo.addComment(req.body, bookId, reviewId, userId, userName))
-        .then(() => responsesController.sendData(res, 201, {message: "Successfully added a comment."}))
+        .then((val) => responsesController.sendData(res, 201, val[0][0][0]))
         .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
     },
 
@@ -56,7 +56,7 @@ const controller = {
         const userId = urlParams.get("userId");
 
         commentsRepo.editComment(commentId, req.body)
-        .then(() => responsesController.sendData(res, 200, {message: "Successfully edited comment."}))
+        .then((val) => responsesController.sendData(res, 200, val[0][0][0]))
         .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
     },
 

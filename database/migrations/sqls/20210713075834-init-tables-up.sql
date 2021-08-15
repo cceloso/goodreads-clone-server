@@ -91,6 +91,7 @@ CREATE TABLE `books` (
     `totalRating` FLOAT(10, 2) NOT NULL,
     `averageRating` FLOAT(3, 2) NOT NULL,
     `ratingCtr` INT NOT NULL,
+    `userId` INT NOT NULL,
     CONSTRAINT `titleAndAuthor` UNIQUE(`title`, `author`)
 );
 
@@ -154,11 +155,12 @@ CREATE PROCEDURE `postBook`(
     IN `p_published` VARCHAR(4),
     IN `p_description` TEXT,
     IN `p_genres` JSON,
-    IN `p_imageUrl` VARCHAR(255)
+    IN `p_imageUrl` VARCHAR(255),
+    IN `p_userId` INT
 )
 BEGIN
-	INSERT INTO `books` (`title`, `author`, `isbn`, `publisher`, `published`, `description`, `genres`, `imageUrl`, `totalRating`, `averageRating`, `ratingCtr`)
-    VALUES (`p_title`, `p_author`, `p_isbn`, `p_publisher`, `p_published`, `p_description`, `p_genres`, `p_imageUrl`, 0, 0, 0);
+	INSERT INTO `books` (`title`, `author`, `isbn`, `publisher`, `published`, `description`, `genres`, `imageUrl`, `totalRating`, `averageRating`, `ratingCtr`, `userId`)
+    VALUES (`p_title`, `p_author`, `p_isbn`, `p_publisher`, `p_published`, `p_description`, `p_genres`, `p_imageUrl`, 0, 0, 0, `p_userId`);
 
     SELECT * FROM `books`
     WHERE `title` = `p_title` AND `author` = `p_author`;
@@ -294,6 +296,9 @@ CREATE PROCEDURE `putReview`(
 BEGIN
     UPDATE `reviews`
     SET `rating` = `p_rating`, `review` = `p_review`
+    WHERE `id` = `p_id`;
+
+    SELECT * FROM `reviews`
     WHERE `id` = `p_id`;
 END;
 
@@ -442,6 +447,9 @@ BEGIN
     UPDATE `comments`
     SET `comment` = `p_comment`
     WHERE `id` = `p_commentId`;
+
+    SELECT * FROM `comments`
+    WHERE `id` = `p_commentId`;
 END;
 
 CREATE PROCEDURE `deleteComment`(
@@ -562,6 +570,9 @@ BEGIN
     UPDATE `topics`
     SET `title` = `p_title`, `content` = `p_content`, `flair` = `p_flair`
     WHERE `id` = `p_id`;
+
+    SELECT * FROM `topics`
+    WHERE `id` = `p_id`;
 END;
 
 CREATE PROCEDURE `deleteTopic`(
@@ -630,6 +641,9 @@ BEGIN
     UPDATE `replies`
     SET `content` = `p_content`
     WHERE `id` = `p_id` AND `topicId` = `p_topicId`;
+
+    SELECT * FROM `replies`
+    WHERE `id` = `p_id`;
 END;
 
 CREATE PROCEDURE `deleteReply`(

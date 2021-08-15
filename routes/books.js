@@ -12,8 +12,8 @@ router.get('/:bookId', booksController.getBook);
 router.get('/', booksController.getBooks);
 // router.post('/', passport.authenticate('jwt', { session: false }), booksController.postBook);
 router.post('/', booksController.postBook);
-router.put('/:bookId', booksController.putBook);
-router.delete('/:bookId', booksController.deleteBook);
+router.put('/:bookId', passport.authenticate('jwt', { session: false }), booksController.putBook);
+router.delete('/:bookId', passport.authenticate('jwt', { session: false }), booksController.deleteBook);
 router.get('/?genre=:genreId', booksController.getBooks);
 router.get('/?search=:searchParam', booksController.getBooks);
 
@@ -23,15 +23,15 @@ router.get('/:bookId/reviews/:reviewId', reviewsController.getReview);
 router.get('/:bookId/reviews?userId=:userId', reviewsController.getReview);
 router.get('/:bookId/reviews', reviewsController.getReviews);
 router.post('/:bookId/reviews', passport.authenticate('jwt', { session: false }), reviewsController.postReview);
-router.put('/:bookId/reviews/:reviewId', reviewsController.putReview);
-router.delete('/:bookId/reviews/:reviewId', reviewsController.deleteReview);
+router.put('/:bookId/reviews/:reviewId', passport.authenticate('jwt', { session: false }), reviewsController.putReview);
+router.delete('/:bookId/reviews/:reviewId', passport.authenticate('jwt', { session: false }), reviewsController.deleteReview);
 
 /* -- COMMENTS -- */
 
 router.get('/:bookId/reviews/:reviewId/comments/:commentId', commentsController.getComment);
 router.get('/:bookId/reviews/:reviewId/comments', commentsController.getComments);
 router.post('/:bookId/reviews/:reviewId/comments', passport.authenticate('jwt', { session: false }), commentsController.postComment);
-router.put('/:bookId/reviews/:reviewId/comments/:commentId', commentsController.putComment);
-router.delete('/:bookId/reviews/:reviewId/comments/:commentId', commentsController.deleteComment);
+router.put('/:bookId/reviews/:reviewId/comments/:commentId', passport.authenticate('jwt', { session: false }), commentsController.putComment);
+router.delete('/:bookId/reviews/:reviewId/comments/:commentId', passport.authenticate('jwt', { session: false }), commentsController.deleteComment);
 
 module.exports = router;

@@ -101,12 +101,10 @@ const controller = {
                 title = titleAndAuthor.title;
                 author = titleAndAuthor.author;
             })
-            .then(() => reviewsRepo.addReview(req.body, bookId, title, author, userId, userName))
             .then(() => reviewsRepo.increaseTotalRating(req.body.rating, bookId))
             .then(() => reviewsRepo.updateAverageRating(bookId))
-            .then(() => {
-                responsesController.sendData(res, 201, {message: "Successfully added a review."});
-            })
+            .then(() => reviewsRepo.addReview(req.body, bookId, title, author, userId, userName))
+            .then((val) => responsesController.sendData(res, 201, val[0][0][0]))
             .catch((err) => {
                 if(err.code === "ER_DUP_ENTRY") {
                     responsesController.sendError(res, 409, "User has already written a review for the book.", "DUPLICATE_ENTRY");
@@ -117,8 +115,6 @@ const controller = {
         } catch(err) {
             responsesController.sendError(res, 401, err, "UNAUTHORIZED");
         }
-
-        
     },
 
     putReview: (req, res) => {
@@ -137,12 +133,8 @@ const controller = {
         .then(() => reviewsRepo.changeTotalRating(reviewId, oldRating, newRating, bookId))
         .then(() => reviewsRepo.updateAverageRating(bookId))
         .then(() => reviewsRepo.editReview(reviewId, updatedReview))
-        .then(() => {
-            responsesController.sendData(res, 200, {message: "Successfully edited review."});
-        })
-        .catch((err) => {
-            responsesController.sendError(res, 400, err, "BAD_REQUEST");
-        })
+        .then((val) => responsesController.sendData(res, 200, val[0][0][0]))
+        .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
     },
 
     deleteReview: (req, res) => {

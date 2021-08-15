@@ -55,7 +55,7 @@ const controller = {
         }
 
         repliesRepo.editReply(req.params.replyId, req.body.content, req.params.topicId)
-        .then(() => responsesController.sendData(res, 200, {message: "Successfully edited reply."}))
+        .then((val) => responsesController.sendData(res, 200, val[0][0][0]))
         .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
     },
 

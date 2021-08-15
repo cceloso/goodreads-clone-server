@@ -62,7 +62,10 @@ const controller = {
             responsesController.sendError(res, 400, "Request body is empty.", "BAD_REQUEST");
         }
 
-        booksRepo.addBook(req.body)
+        const queryObject = url.parse(req.url, true).query;
+        const userId = queryObject.userId;
+
+        booksRepo.addBook(req.body, userId)
         .then(() => responsesController.sendData(res, 201, {message: "Successfully added a book."}))
         .catch((err) => {
             if(err.code == 'ER_DUP_ENTRY') {

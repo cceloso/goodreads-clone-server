@@ -49,11 +49,15 @@ io.on("connection", socket => {
   });
 
   socket.on("sendReply", (replyObject, topicId) => {
-    // console.log("New reply!");
-    // console.log(`id: ${replyObject.id}`);
-    // console.log(`content: ${replyObject.content}`);
-    // console.log(`userName: ${replyObject.userName}`);
     io.to(topicId).emit("newReply", replyObject);
+  });
+  
+  socket.on("updateReply", (replyObject, topicId) => {
+    io.to(topicId).emit("updatedReply", replyObject);
+  });
+  
+  socket.on("removeReply", (topicId, replyId) => {
+    io.to(topicId).emit("removedReply", replyId);
   });
 
   socket.on("sendTopic", (topicObject) => {
@@ -64,7 +68,7 @@ io.on("connection", socket => {
     io.emit("newUserState");
   });
 
-  console.log(`Socket ${socket.id} has connected`);
+  // console.log(`Socket ${socket.id} has connected`);
 });
 
 /**
