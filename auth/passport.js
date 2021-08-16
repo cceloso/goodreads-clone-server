@@ -13,12 +13,12 @@ module.exports = (passport) => {
         usersRepo.getUserById(jwt_payload.sub)
         .then((val) => {
             let user = val[0][0][0];
-            console.log("user authorized");
+            // console.log("user authorized");
             return done(null, user);
         })
         .catch((err) => {
-            console.log("user not authorized");
-            console.log("err:", err);
+            // console.log("user not authorized");
+            // console.log("err:", err);
             return done(err, false);
         })
     }));

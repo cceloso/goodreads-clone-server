@@ -4,7 +4,8 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+const socket = require('../socket')();
+var app = require('../app')(socket);
 var debug = require('debug')('miniapp:server');
 var http = require('http');
 
@@ -20,8 +21,11 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-var io = require('socket.io')(server);
+// var io = require('socket.io')(server);
 
+// Delayed socket initialization, need to wait for the app.js and 
+// the httpServer to be instantiated first before socket initialization
+socket.initialize(server);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -31,45 +35,41 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-const documents = {};
-const topics = {};
-const replies = {};
+// io.on("connection", socket => {
+//   let previousId;
 
-io.on("connection", socket => {
-  let previousId;
+//   const safeJoin = currentId => {
+//     socket.leave(previousId);
+//     socket.join(currentId, () => console.log(`Socket ${socket.id} joined room ${currentId}`));
+//     previousId = currentId;
+//   };
 
-  const safeJoin = currentId => {
-    socket.leave(previousId);
-    socket.join(currentId, () => console.log(`Socket ${socket.id} joined room ${currentId}`));
-    previousId = currentId;
-  };
+//   socket.on("joinForum", (topicId) => {
+//     safeJoin(topicId);
+//   });
 
-  socket.on("joinForum", (topicId) => {
-    safeJoin(topicId);
-  });
-
-  socket.on("sendReply", (replyObject, topicId) => {
-    io.to(topicId).emit("newReply", replyObject);
-  });
+//   socket.on("sendReply", (replyObject, topicId) => {
+//     io.to(topicId).emit("newReply", replyObject);
+//   });
   
-  socket.on("updateReply", (replyObject, topicId) => {
-    io.to(topicId).emit("updatedReply", replyObject);
-  });
+//   socket.on("updateReply", (replyObject, topicId) => {
+//     io.to(topicId).emit("updatedReply", replyObject);
+//   });
   
-  socket.on("removeReply", (topicId, replyId) => {
-    io.to(topicId).emit("removedReply", replyId);
-  });
+//   socket.on("removeReply", (topicId, replyId) => {
+//     io.to(topicId).emit("removedReply", replyId);
+//   });
 
-  socket.on("sendTopic", (topicObject) => {
-    io.emit("newTopic", topicObject);
-  });
+//   socket.on("sendTopic", (topicObject) => {
+//     io.emit("newTopic", topicObject);
+//   });
 
-  socket.on("updateNavbar", () => {
-    io.emit("newUserState");
-  });
+//   socket.on("updateNavbar", () => {
+//     io.emit("newUserState");
+//   });
 
-  // console.log(`Socket ${socket.id} has connected`);
-});
+//   console.log(`Socket ${socket.id} has connected`);
+// });
 
 /**
  * Normalize a port into a number, string, or false.

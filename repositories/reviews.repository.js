@@ -7,7 +7,6 @@ const reviewsRepo = {
     },
 
     getReviewByUserAndBook: (userId, bookId) => {
-        console.log("inside getReviewByUserAndBook");
         return knex.raw("CALL getReviewByUserAndBook(?, ?)", [userId, bookId]);
     },
 
@@ -27,7 +26,6 @@ const reviewsRepo = {
         return knex.raw("CALL postReview(?, ?, ?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, title, author, userId, userName])
         .then((val) => {
             const reviewObject = val[0][0][0];
-            // console.log("reviewObject:", reviewObject);
 
             const redisObject = {
                 id: reviewObject.id,

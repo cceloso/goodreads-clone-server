@@ -12,8 +12,6 @@ const usersRepo = {
     },
 
     getUserById: (userId) => {
-        // console.log("inside getUserById");
-        // console.log("userId:", userId);
         return knex.raw("CALL getUserById(?)", [userId]);
     },
 
@@ -30,14 +28,11 @@ const usersRepo = {
                 } else {
                     reject("Invalid user");
                 }
-                console.log("correctPassword:", correctPassword);
             })
             .then(async () => {
                 if (await bcrypt.compare(user.password, correctPassword)) {
-                    console.log("password is correct");
                     resolve(userObject);
                 } else {
-                    console.log("password is incorrect");
                     reject("Invalid password");
                 }
             });
@@ -47,7 +42,6 @@ const usersRepo = {
     addUser: async (newUser) => {
         try {
             const hashedPassword = await bcrypt.hash(newUser.password, 10);
-            console.log("hashedPassword:", hashedPassword);
             
             return new Promise((resolve, reject) => {
                 knex.raw("CALL postUser(?, ?, ?, ?, ?, ?, ?)", [newUser.firstname, newUser.lastname, newUser.username, newUser.email, hashedPassword, newUser.imageUrl, "guest"])
@@ -65,21 +59,16 @@ const usersRepo = {
                         role: userObject.role,
                     };
 
-                    console.log("redisObject:", redisObject);
-
                     redis.hmset(`users:${userObject.id}`, redisObject);
                     
                     resolve(userObject);
                 })
                 .catch((err) => {
-                    // console.log("err in repo:", err);
                     reject(err);
                 });
             });
             
         } catch(err) {
-            console.log("inside catch in addUser in repo");
-            console.log("err:", err);
             return err;
         }
     },
@@ -98,7 +87,6 @@ const usersRepo = {
                 } else {
                     reject("user dne");
                 }
-                console.log("oldPassword:", oldPassword);
             })
             .then(async () => {
                 if (await bcrypt.compare(updatedUser.password, oldPassword)) {

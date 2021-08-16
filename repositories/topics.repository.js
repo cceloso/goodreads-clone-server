@@ -26,7 +26,6 @@ const topicsRepo = {
     },
 
     editTopic: (topicId, updatedTopic) => {
-        console.log("inside editTopic in topics repo");
         return knex.raw("CALL putTopic(?, ?, ?, ?)", [topicId, updatedTopic.title, updatedTopic.content, updatedTopic.flair]);
     },
 
