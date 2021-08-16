@@ -1,16 +1,44 @@
 var express = require('express');
 var router = express.Router();
 const passport = require('passport');
+const multer = require('multer');
+const path = require('path');
 
 const booksController = require('../controllers/books.controller');
 const commentsController = require('../controllers/comments.controller');
 const reviewsController = require('../controllers/reviews.controller');
+
+/* -- STORAGE FOR BOOK COVERS -- */
+
+const bookCoverPath = path.join(__dirname, '..', '..', 'public', 'images', 'books');
+const bookCoverStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, bookCoverPath);
+    },
+    filename: (req, file, cb) => {
+        const fileName = file.originalname.toLowerCase().split(' ').join('-');
+        cb(null, fileName)
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+        cb(null, true);
+        } else {
+        cb(null, false);
+        return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        }
+    }
+});
 
 /* -- BOOKS -- */
 
 router.get('/:bookId', booksController.getBook);
 router.get('/', booksController.getBooks);
 // router.post('/', passport.authenticate('jwt', { session: false }), booksController.postBook);
+// router.post('/', upload.single('imageUrl'), booksController.postBook);
 router.post('/', booksController.postBook);
 router.put('/:bookId', passport.authenticate('jwt', { session: false }), booksController.putBook);
 router.delete('/:bookId', passport.authenticate('jwt', { session: false }), booksController.deleteBook);
