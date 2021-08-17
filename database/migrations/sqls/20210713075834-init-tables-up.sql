@@ -147,6 +147,14 @@ BEGIN
     WHERE `id` = `p_id`;
 END;
 
+CREATE PROCEDURE `getAverageRating`(
+	IN `p_id` INT
+)
+BEGIN
+	SELECT `averageRating`  FROM `books`
+    WHERE `id` = `p_id`;
+END;
+
 CREATE PROCEDURE `postBook`(
 	IN `p_title` VARCHAR(255),
     IN `p_author` VARCHAR(255),
@@ -244,6 +252,14 @@ CREATE INDEX idx_userId ON `reviews` (`userId`);
 CREATE INDEX idx_dateCreated ON `reviews` (`dateCreated`);
 CREATE INDEX idx_bookId_userId ON `reviews` (`bookId`, `userId`);
 
+CREATE PROCEDURE `getReview`(
+	IN `p_id` INT
+)
+BEGIN
+	SELECT *  FROM `reviews`
+    WHERE `id` = `p_id`;
+END;
+
 CREATE PROCEDURE `getReviews`(
 	IN `p_bookId` INT
 )
@@ -284,8 +300,11 @@ BEGIN
 	INSERT INTO `reviews` (`rating`, `review`, `dateCreated`, `bookId`, `title`, `author`, `userId`, `userName`)
     VALUES (`p_rating`, `p_review`, NOW(), `p_bookId`, `p_title`, `p_author`, `p_userId`, `p_userName`);
 
-    SELECT * FROM `reviews`
-    WHERE `bookId` = `p_bookId` AND `userId` = `p_userId`;
+    -- SELECT * FROM `reviews`
+    -- WHERE `bookId` = `p_bookId` AND `userId` = `p_userId`;
+    SELECT * FROM `reviews` WHERE `id` = (
+        SELECT MAX(`id`) FROM `reviews`
+    );
 END;
 
 CREATE PROCEDURE `putReview`(
@@ -653,6 +672,14 @@ CREATE PROCEDURE `deleteReply`(
 BEGIN
     DELETE FROM `replies`
     WHERE `id` = `p_id` AND `topicId` = `p_topicId`;
+END;
+
+CREATE PROCEDURE `deleteRepliesByTopic`(
+    IN `p_topicId` INT
+)
+BEGIN
+    DELETE FROM `replies`
+    WHERE `topicId` = `p_topicId`;
 END;
 
 -- FORUM TOPIC AND REPLY

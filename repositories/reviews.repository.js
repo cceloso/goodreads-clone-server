@@ -3,7 +3,7 @@ const redis = require('./redis');
 
 const reviewsRepo = {
     getReview: (reviewId) => {
-        return redis.hgetall(`reviews:${reviewId}`);
+        return knex.raw("CALL getReview(?)", [reviewId]);
     },
 
     getReviewByUserAndBook: (userId, bookId) => {
@@ -23,45 +23,15 @@ const reviewsRepo = {
     },
 
     addReview: (newReview, bookId, title, author, userId, userName) => {
-        return knex.raw("CALL postReview(?, ?, ?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, title, author, userId, userName])
-        .then((val) => {
-            const reviewObject = val[0][0][0];
-
-            const redisObject = {
-                id: reviewObject.id,
-                rating: reviewObject.rating,
-                review: reviewObject.review,
-                dateCreated: reviewObject.dateCreated,
-                bookId: reviewObject.bookId,
-                title: reviewObject.title,
-                author: reviewObject.author,
-                userId: reviewObject.userId,
-                userName: reviewObject.userName
-            };
-
-            redis.hmset(`reviews:${reviewObject.id}`, redisObject);
-        });
+        return knex.raw("CALL postReview(?, ?, ?, ?, ?, ?, ?)", [newReview.rating, newReview.review, bookId, title, author, userId, userName]);
     },
 
     editReview: (reviewId, updatedReview) => {
-        return knex.raw("CALL putReview(?, ?, ?)", [reviewId, updatedReview.rating, updatedReview.review])
-        .then((val) => {
-            if(val[0].affectedRows === 0) {
-                throw "Review not found. Please pass a valid review id.";
-            } else {
-                const redisObject = {
-                    rating: updatedReview.rating,
-                    review: updatedReview.review
-                };
-
-                redis.hmset(`reviews:${reviewId}`, redisObject);
-            }
-        });
+        return knex.raw("CALL putReview(?, ?, ?)", [reviewId, updatedReview.rating, updatedReview.review]);
     },
 
     deleteReview: (reviewId) => {
-        return knex.raw("CALL deleteReview(?)", [reviewId])
-        .then(() => redis.del(`reviews:${reviewId}`));
+        return knex.raw("CALL deleteReview(?)", [reviewId]);
     },
 
     deleteReviewsByBook: (bookId) => {
@@ -100,6 +70,10 @@ const reviewsRepo = {
         return knex.raw("CALL updateAverageRating(?)", [bookId])
         .then((val) => averageRating = val[0][0][0]['averageRating'])
         .then(() => redis.hset(`books:${bookId}`, "averageRating", averageRating));
+    },
+
+    getAverageRating: (bookId) => {
+        return knex.raw("CALL getAverageRating(?)", [bookId]);
     }
 };
 

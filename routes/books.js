@@ -38,9 +38,9 @@ module.exports = (socket) => {
     
     router.get('/:bookId', booksController.getBook);
     router.get('/', booksController.getBooks);
-    // router.post('/', passport.authenticate('jwt', { session: false }), booksController.postBook);
+    router.post('/', passport.authenticate('jwt', { session: false }), booksController.postBook);
     // router.post('/', upload.single('imageUrl'), booksController.postBook);
-    router.post('/', booksController.postBook);
+    // router.post('/', booksController.postBook);
     router.put('/:bookId', passport.authenticate('jwt', { session: false }), booksController.putBook);
     router.delete('/:bookId', passport.authenticate('jwt', { session: false }), booksController.deleteBook);
     router.get('/?genre=:genreId', booksController.getBooks);

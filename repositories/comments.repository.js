@@ -11,44 +11,15 @@ const usersRepo = {
     },
 
     addComment: (newComment, bookId, reviewId, userId, userName) => {
-        return knex.raw("CALL postComment(?, ?, ?, ?, ?)", [newComment.comment, bookId, reviewId, userId, userName])
-        .then((val) => {
-            const commentObject = val[0][0][0];
-
-            const redisObject = {
-                id: commentObject.id,
-                comment: commentObject.comment,
-                dateCreated: commentObject.dateCreated,
-                bookId: commentObject.bookId,
-                reviewId: commentObject.reviewId,
-                userId: commentObject.userId,
-                userName: commentObject.userName
-            };
-
-            redis.hmset(`comments:${commentObject.id}`, redisObject);
-        });
+        return knex.raw("CALL postComment(?, ?, ?, ?, ?)", [newComment.comment, bookId, reviewId, userId, userName]);
     },
 
     editComment: (commentId, updatedComment) => {
-        return knex.raw("CALL putComment(?, ?)", [commentId, updatedComment.comment])
-        .then((val) => {
-            if(val[0].affectedRows === 0) {
-                throw "Comment not found. Please pass a valid comment id.";
-            } else {
-                redis.hset(`comments:${commentId}`, "comment", updatedComment.comment);
-            }
-        });
+        return knex.raw("CALL putComment(?, ?)", [commentId, updatedComment.comment]);
     },
 
     deleteComment: (commentId) => {
-        return knex.raw("CALL deleteComment(?)", [commentId])
-        .then((val) => {
-            if(val[0].affectedRows === 0) {
-                throw "Comment not found. Please pass a valid comment id.", "NOT_FOUND";
-            } else {
-                redis.del(`comments:${commentId}`);
-            }
-        });
+        return knex.raw("CALL deleteComment(?)", [commentId]);
     },
 
     deleteCommentsByBook: (bookId) => {

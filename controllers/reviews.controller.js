@@ -77,38 +77,41 @@ module.exports = (socket) => {
             }
     
             const bookId = req.params.bookId;
+            const queryObject = url.parse(req.url, true).query;
+            const userId = queryObject.userId;
             let userName = "";
             let title = "";
             let author = "";
+            let averageRating = 0;
     
-            const token = req.headers.authorization.split(' ')[1];
-    
-            try {
-                const decoded = jwt.verify(token, "secret");
-                const userId = decoded.sub;
-                
-                usersRepo.getUserById(userId)
-                .then((val) => userName = val[0][0][0]['userName'])
-                .then(() => booksRepo.getTitleAndAuthor(bookId))
-                .then((val) => {
-                    let titleAndAuthor = val[0][0][0];
-                    title = titleAndAuthor.title;
-                    author = titleAndAuthor.author;
-                })
-                .then(() => reviewsRepo.increaseTotalRating(req.body.rating, bookId))
-                .then(() => reviewsRepo.updateAverageRating(bookId))
-                .then(() => reviewsRepo.addReview(req.body, bookId, title, author, userId, userName))
-                .then((val) => responsesController.sendData(res, 201, val[0][0][0]))
-                .catch((err) => {
-                    if(err.code === "ER_DUP_ENTRY") {
-                        responsesController.sendError(res, 409, "User has already written a review for the book.", "DUPLICATE_ENTRY");
-                    } else {
-                        responsesController.sendError(res, 400, err, "BAD_REQUEST");
-                    }
-                })
-            } catch(err) {
-                responsesController.sendError(res, 401, err, "UNAUTHORIZED");
-            }
+            usersRepo.getUserById(userId)
+            .then((val) => userName = val[0][0][0]['userName'])
+            .then(() => booksRepo.getTitleAndAuthor(bookId))
+            .then((val) => {
+                let titleAndAuthor = val[0][0][0];
+                title = titleAndAuthor.title;
+                author = titleAndAuthor.author;
+            })
+            .then(() => reviewsRepo.increaseTotalRating(req.body.rating, bookId))
+            .then(() => reviewsRepo.updateAverageRating(bookId))
+            .then(() => reviewsRepo.getAverageRating(bookId))
+            .then((val) => averageRating = val[0][0][0].averageRating)
+            .then(() => reviewsRepo.addReview(req.body, bookId, title, author, userId, userName))
+            .then((val) => {
+                const reviewObject = val[0][0][0];
+                const room = `bookUpdate-${bookId}`;
+
+                socket.broadcast(room, "newReview", {reviewObject: reviewObject, averageRating: averageRating});
+
+                responsesController.sendData(res, 201, reviewObject);
+            })
+            .catch((err) => {
+                if(err.code === "ER_DUP_ENTRY") {
+                    responsesController.sendError(res, 409, "User has already written a review for the book.", "DUPLICATE_ENTRY");
+                } else {
+                    responsesController.sendError(res, 400, err, "BAD_REQUEST");
+                }
+            })
         },
     
         putReview: (req, res) => {
@@ -121,27 +124,44 @@ module.exports = (socket) => {
             const bookId = req.params.bookId;
             const newRating = updatedReview.rating;
             let oldRating = 0;
+            let averageRating = 0;
     
             reviewsRepo.getRating(reviewId)
             .then((val) => oldRating = val[0][0][0]['rating'])
             .then(() => reviewsRepo.changeTotalRating(reviewId, oldRating, newRating, bookId))
             .then(() => reviewsRepo.updateAverageRating(bookId))
+            .then(() => reviewsRepo.getAverageRating(bookId))
+            .then((val) => averageRating = val[0][0][0].averageRating)
             .then(() => reviewsRepo.editReview(reviewId, updatedReview))
-            .then((val) => responsesController.sendData(res, 200, val[0][0][0]))
+            .then((val) => {
+                const reviewObject = val[0][0][0];
+                const room = `bookUpdate-${bookId}`;
+
+                socket.broadcast(room, "updatedReview", {reviewObject: reviewObject, averageRating: averageRating});
+
+                responsesController.sendData(res, 200, reviewObject);
+            })
             .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
         },
     
         deleteReview: (req, res) => {
             const reviewId = req.params.reviewId;
             const bookId = req.params.bookId;
+            const queryObject = url.parse(req.url, true).query;
+            const userId = queryObject.userId;
+            let averageRating = 0;
     
             deleteReviewSubprocesses(reviewId, bookId)
+            .then(() => reviewsRepo.getAverageRating(bookId))
+            .then((val) => averageRating = val[0][0][0].averageRating)
             .then(() => {
+                const room = `bookUpdate-${bookId}`;
+
+                socket.broadcast(room, "removedReview", {reviewId: reviewId, userId: userId, averageRating: averageRating});
+
                 responsesController.sendData(res, 200, {message: "Successfully deleted review."});
             })
-            .catch((err) => {
-                responsesController.sendError(res, 400, err, "BAD_REQUEST");
-            })
+            .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
         },
     
         deleteReviewsByUser: (reviews) => {

@@ -40,7 +40,14 @@ module.exports = (socket) => {
             usersRepo.getUserById(userId)
             .then((val) => userName = val[0][0][0]['userName'])
             .then(() => commentsRepo.addComment(req.body, bookId, reviewId, userId, userName))
-            .then((val) => responsesController.sendData(res, 201, val[0][0][0]))
+            .then((val) => {
+                const commentObject = val[0][0][0];
+                const room = `bookUpdate-${bookId}-${reviewId}`;
+
+                socket.broadcast(room, "newComment", {reviewId: reviewId, commentObject: commentObject});
+                
+                responsesController.sendData(res, 201, commentObject);
+            })
             .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
         },
     
@@ -57,7 +64,14 @@ module.exports = (socket) => {
             const userId = urlParams.get("userId");
     
             commentsRepo.editComment(commentId, req.body)
-            .then((val) => responsesController.sendData(res, 200, val[0][0][0]))
+            .then((val) => {
+                const commentObject = val[0][0][0];
+                const room = `bookUpdate-${bookId}-${reviewId}`;
+
+                socket.broadcast(room, "updatedComment", {reviewId: reviewId, commentObject: commentObject});
+
+                responsesController.sendData(res, 200, commentObject);
+            })
             .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
         },
     
@@ -70,7 +84,13 @@ module.exports = (socket) => {
             const userId = urlParams.get("userId");
     
             commentsRepo.deleteComment(commentId)
-            .then(() => responsesController.sendData(res, 200, {message: "Successfully deleted comment."}))
+            .then(() => {
+                const room = `bookUpdate-${bookId}-${reviewId}`;
+
+                socket.broadcast(room, "removedComment", {reviewId: reviewId, commentId: commentId});
+
+                responsesController.sendData(res, 200, {message: "Successfully deleted comment."});
+            })
             .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"))
         }
     }

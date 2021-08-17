@@ -19,6 +19,10 @@ const repliesRepo = {
 
     deleteReply: (replyId, topicId) => {
         return knex.raw("CALL deleteReply(?, ?)", [replyId, topicId]);
+    },
+
+    deleteRepliesByTopic: (topicId) => {
+        return knex.raw("CALL deleteRepliesByTopic(?)", [topicId]);
     }
 };
 

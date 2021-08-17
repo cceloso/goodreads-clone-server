@@ -3,12 +3,13 @@ const url = require('url');
 module.exports = (socket) => {
     const responsesController = require('./responses.controller');
     
+    const repliesRepo = require('../repositories/replies.repository');
     const topicsRepo = require('../repositories/topics.repository');
     const usersRepo = require('../repositories/users.repository');
     
     
     const searchTopics = (res, searchParam) => {
-        searchParam = `${searchParam}%`;
+        searchParam = `%${searchParam}%`;
     
         topicsRepo.searchTopics(searchParam)
         .then((val) => responsesController.sendData(res, 200, val[0][0]))
@@ -90,13 +91,31 @@ module.exports = (socket) => {
             }
     
             topicsRepo.editTopic(req.params.topicId, req.body)
-            .then((val) => responsesController.sendData(res, 200, val[0][0][0]))
+            .then((val) => {
+                const topicObject = val[0][0][0];
+                const room = `topicUpdate-${topicObject.id}`;
+
+                socket.broadcast(room, "updatedTopic", topicObject);
+                socket.broadcastWithoutRoom("updatedTopic", topicObject);
+
+                responsesController.sendData(res, 200, topicObject);
+            })
             .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
         },
     
         deleteTopic: (req, res) => {
-            topicsRepo.deleteTopic(req.params.topicId)
-            .then(() => responsesController.sendData(res, 200, {message: "Successfully deleted topic."}))
+            const topicId = req.params.topicId;
+
+            topicsRepo.deleteTopic(topicId)
+            .then(() => repliesRepo.deleteRepliesByTopic(topicId))
+            .then(() => {
+                const room = `topicUpdate-${topicId}`;
+
+                socket.broadcast(room, "removedTopic", topicId);
+                socket.broadcastWithoutRoom("removedTopic", topicId);
+
+                responsesController.sendData(res, 200, {message: "Successfully deleted topic."});
+            })
             .catch((err) => responsesController.sendError(res, 400, err, "BAD_REQUEST"));
         }
     }
